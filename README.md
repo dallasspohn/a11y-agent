@@ -97,4 +97,5 @@ TBD
 ## Contact
 
 **Lead:** Dallas Spohn (PTL Team)  
+**Lead:** Surya Pathak
 **Red Hat Innovation Days 2026 Global AI Challenge**
