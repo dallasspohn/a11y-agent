@@ -1,0 +1,17 @@
+{
+  "name": "a11y-agent",
+  "version": "0.1.0",
+  "description": "AI-powered accessibility testing agent — axe-core + Claude for real-time fix suggestions",
+  "type": "module",
+  "scripts": {
+    "scan": "node src/scan.js",
+    "demo": "node src/scan.js --url http://localhost:8080"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@axe-core/playwright": "^4.10.0",
+    "playwright": "^1.52.0",
+    "commander": "^13.1.0",
+    "chalk": "^5.4.1"
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .low-contrast { color: #aaa; background: #fff; }
+    .btn { background: #007bff; color: white; padding: 8px 16px; border: none; cursor: pointer; }
+    .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+    .card { border: 1px solid #ddd; padding: 16px; margin: 10px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+  </style>
+</head>
+<body>
+  <!-- Missing lang attribute on <html> -->
+  <!-- Missing <h1> — jumps straight to <h3> -->
+
+  <div class="nav">
+    <!-- Links with no text -->
+    <a href="/home"><img src="logo.png"></a>
+    <a href="/products">Products</a>
+    <a href="/settings">⚙</a> <!-- Icon-only link, no accessible name -->
+  </div>
+
+  <h3>Welcome to the Dashboard</h3> <!-- Skipped heading levels -->
+
+  <p class="low-contrast">Important: Your subscription expires in 3 days.</p>
+
+  <!-- Image without alt text -->
+  <img src="banner.jpg" width="800" height="200">
+
+  <!-- Form with no labels -->
+  <div class="card">
+    <h5>Search Products</h5>
+    <input type="text" placeholder="Search...">
+    <select>
+      <option value="">Filter by category</option>
+      <option value="hardware">Hardware</option>
+      <option value="software">Software</option>
+    </select>
+    <button class="btn" onclick="search()">Go</button>
+  </div>
+
+  <!-- Table without headers -->
+  <div class="card">
+    <h5>Recent Orders</h5>
+    <table>
+      <tr>
+        <td>ORD-001</td>
+        <td>RHEL 9 License</td>
+        <td>$499</td>
+        <td><a href="#">View</a></td>
+      </tr>
+      <tr>
+        <td>ORD-002</td>
+        <td>OpenShift Subscription</td>
+        <td>$2,400</td>
+        <td><a href="#">View</a></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Click handler on non-interactive element -->
+  <div onclick="showDetails()" style="cursor: pointer; color: blue; text-decoration: underline;">
+    Show more details
+  </div>
+
+  <!-- Auto-playing content with no controls -->
+  <video src="promo.mp4" autoplay></video>
+</body>
+</html>
