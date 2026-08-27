@@ -5,13 +5,19 @@
   "type": "module",
   "scripts": {
     "scan": "node src/scan.js",
-    "demo": "node src/scan.js --url http://localhost:8080"
+    "demo": "node src/scan.js --url http://localhost:8080",
+    "conversation-demo": "node src/conversation-demo.js interactive",
+    "conversation-test": "node src/conversation-demo.js scripted",
+    "conversation-parser": "node src/conversation-demo.js parser",
+    "conversation-state": "node src/conversation-demo.js state"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
     "@axe-core/playwright": "^4.10.0",
-    "playwright": "^1.52.0",
+    "chalk": "^5.4.1",
     "commander": "^13.1.0",
-    "chalk": "^5.4.1"
+    "mic": "^2.1.2",
+    "playwright": "^1.52.0",
+    "vosk": "^0.3.39"
   }
 }

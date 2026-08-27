@@ -26,6 +26,13 @@ node src/scan.js --url https://example.com
 
 # Get JSON output (for CI/CD)
 node src/scan.js --url https://example.com --json
+
+# Voice command mode (hands-free scanning)
+./setup-voice.sh  # One-time setup
+node src/scan.js --listen  # Press SPACE to speak: "scan samples/bad-page.html"
+
+# Text-to-speech output
+node src/scan.js --file samples/bad-page.html --voice
 ```
 
 ## Features
@@ -36,6 +43,33 @@ node src/scan.js --url https://example.com --json
 ✅ Colorized terminal output  
 ✅ AI context-aware fix suggestions via Claude  
 ✅ JSON export for CI/CD integration  
+✅ **Voice commands** — Hands-free scanning via speech-to-text (--listen)  
+✅ **Text-to-speech** — Audio output of results (--voice)  
+
+## Voice Commands
+
+Use speech-to-text for hands-free scanning:
+
+```bash
+# One-time setup (downloads Vosk model)
+./setup-voice.sh
+
+# Start voice command mode
+node src/scan.js --listen
+
+# Press and hold SPACE, then speak:
+# "scan samples/bad-page.html"
+# "scan example.com and show me the fixes"
+# "check accessibility of bad-page.html output as json"
+```
+
+**Features:**
+- Push-to-talk interface (no wake word needed)
+- Offline processing (privacy-first, uses Vosk)
+- Natural language parsing ("scan X and show fixes")
+- Audio feedback (beeps for recording start/stop)
+
+See [VOICE_COMMANDS.md](VOICE_COMMANDS.md) for detailed setup and usage.
 
 ## How It Works
 
@@ -73,22 +107,31 @@ Run the scanner to see them all detected and get AI-powered fix suggestions!
 
 ## Dependencies
 
+**Core:**
 - `playwright` — Headless browser automation
 - `@axe-core/playwright` — Accessibility testing engine
 - `@anthropic-ai/sdk` — Claude AI integration
 - `commander` — CLI argument parsing
 - `chalk` — Terminal color output
 
+**Voice Commands (optional):**
+- `vosk` — Offline speech-to-text engine
+- `mic` — Microphone audio capture
+- `alsa-utils` — System audio utilities (Linux)
+- Vosk model files — Download via `./setup-voice.sh`
+
 ## Project Status
 
 🚧 **Prototype Phase** — Functional MVP, ready for demo iteration
 
 **Next Steps:**
+- [x] Voice commands integration (Vosk STT) — See [VOICE_COMMANDS.md](VOICE_COMMANDS.md)
 - [ ] Add batch scanning for multiple URLs
 - [ ] Fix validation (re-scan after applying fixes)
 - [ ] Interactive mode (apply fixes directly to files)
 - [ ] HTML/PDF report generation
 - [ ] CI/CD integration examples
+- [ ] Wake word support ("hey a11y") for voice commands
 
 ## License
 
