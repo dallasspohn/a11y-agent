@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; color: #1f1f1f; background: #fff; }
+    .notice { color: #1f1f1f; background: #fff3cd; padding: 8px 12px; }
+    .btn { background: #0056b3; color: #fff; padding: 8px 16px; border: none; cursor: pointer; font-size: 1rem; }
+    .nav { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .card { border: 1px solid #595959; padding: 16px; margin: 10px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1px solid #595959; padding: 8px; text-align: left; }
+    a { color: #0056b3; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav" aria-label="Main">
+      <a href="/home"><img src="logo.png" alt="Product Dashboard home" width="40" height="40"></a>
+      <a href="/products">Products</a>
+      <a href="/settings" aria-label="Settings">Settings</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Welcome to the Dashboard</h1>
+
+    <p class="notice" role="status">Important: Your subscription expires in 3 days.</p>
+
+    <img src="banner.jpg" width="800" height="200" alt="Promotional banner for Red Hat products">
+
+    <section class="card" aria-labelledby="search-heading">
+      <h2 id="search-heading">Search Products</h2>
+      <form>
+        <p>
+          <label for="product-search">Search</label>
+          <input id="product-search" type="search" name="q">
+        </p>
+        <p>
+          <label for="category-filter">Filter by category</label>
+          <select id="category-filter" name="category">
+            <option value="">All categories</option>
+            <option value="hardware">Hardware</option>
+            <option value="software">Software</option>
+          </select>
+        </p>
+        <button class="btn" type="submit">Search products</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="orders-heading">
+      <h2 id="orders-heading">Recent Orders</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Order ID</th>
+            <th scope="col">Product</th>
+            <th scope="col">Price</th>
+            <th scope="col">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ORD-001</td>
+            <td>RHEL 9 License</td>
+            <td>$499</td>
+            <td><a href="/orders/ORD-001">View order ORD-001</a></td>
+          </tr>
+          <tr>
+            <td>ORD-002</td>
+            <td>OpenShift Subscription</td>
+            <td>$2,400</td>
+            <td><a href="/orders/ORD-002">View order ORD-002</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p>
+      <button class="btn" type="button">Show more details</button>
+    </p>
+  </main>
+</body>
+</html>
