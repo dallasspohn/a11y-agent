@@ -1,5 +1,7 @@
 # A11Y Agent - AI-Powered Accessibility Testing Prototype
 
+> Working plan and commands: see `README.md`. This file is the original prototype notes.
+
 **Project:** Red Hat Innovation Days 2026 Global AI Challenge  
 **Challenge:** Accessibility in Software Development at Scale  
 **Deadline:** September 15, 2026  

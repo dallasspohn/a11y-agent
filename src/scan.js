@@ -20,6 +20,7 @@ program
   .option('--listen', 'Enable voice command mode (speech-to-text)', false)
   .option('--model-path <path>', 'Path to Vosk model directory')
   .option('--interactive', 'Enable interactive conversation mode', false)
+  .option('--fail-on <impact>', 'Exit 1 if violations at this impact or higher (critical|serious|moderate|minor)')
   .parse();
 
 let opts = program.opts();
@@ -286,6 +287,28 @@ async function main() {
   }
 
   await printResults(results);
+
+  // Check --fail-on threshold (for CI/CD)
+  if (opts.failOn && results.violations.length > 0) {
+    const impactLevels = ['minor', 'moderate', 'serious', 'critical'];
+    const thresholdIndex = impactLevels.indexOf(opts.failOn);
+
+    if (thresholdIndex === -1) {
+      console.error(chalk.red(`Invalid --fail-on value: ${opts.failOn}`));
+      console.error(chalk.yellow('Valid values: critical, serious, moderate, minor'));
+      process.exit(1);
+    }
+
+    const failingViolations = results.violations.filter(v => {
+      const violationIndex = impactLevels.indexOf(v.impact);
+      return violationIndex >= thresholdIndex;
+    });
+
+    if (failingViolations.length > 0) {
+      console.log(chalk.red(`\n  ✗ Found ${failingViolations.length} violation(s) at or above "${opts.failOn}" threshold\n`));
+      process.exit(1);
+    }
+  }
 
   let fixes = null;
 

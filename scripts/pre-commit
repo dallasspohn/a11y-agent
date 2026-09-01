@@ -1,0 +1,15 @@
+#!/bin/sh
+# A11Y Agent pre-commit hook — blocks commits with serious+ accessibility violations.
+
+files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.html$')
+[ -z "$files" ] && exit 0
+
+status=0
+for file in $files; do
+  node src/lint.js --file "$file" --fail-on serious || status=1
+done
+
+if [ "$status" -ne 0 ]; then
+  echo "\nCommit blocked: fix serious accessibility violations above (or bypass with --no-verify)."
+fi
+exit $status

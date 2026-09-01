@@ -1,0 +1,30 @@
+name: a11y
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: Lint and scan samples
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium for axe scans
+        run: npx playwright install --with-deps chromium
+
+      - name: Static lint (accessible sample must pass)
+        run: node src/lint.js --file samples/good-page.html --fail-on minor
+
+      - name: axe-core scan (accessible sample must pass)
+        run: node src/scan.js --file samples/good-page.html --fail-on serious
