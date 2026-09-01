@@ -161,7 +161,11 @@ async function main() {
     const { readFile } = await import('fs/promises');
     const content = opts.file ? await readFile(opts.file, 'utf-8') : '';
 
-    const fixes = await getFixSuggestions(results.violations, content);
+    const fixes = await getFixSuggestions({
+      violations: results.violations,
+      source: content,
+      sourceLabel: 'AsciiDoc Source'
+    });
     console.log(fixes);
     await speakText('Fix suggestions generated. See output for details.');
   }
