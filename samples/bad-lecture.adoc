@@ -1,0 +1,60 @@
+= Introduction To Kubernetes
+
+== Overview
+
+In this lecture you'll learn about Kubernetes.
+Kubernetes is a container orchestration platform.
+This platform lets you deploy and manage containerized applications at scale.
+
+== What is Kubernetes?
+
+Kubernetes (often abbreviated as k8s) is an open-source container orchestration system.
+It was originally designed by Google and is now maintained by the Cloud Native Computing Foundation.
+
+The following list shows some key features:
+
+* Automated deployment
+* Self healing capabilities
+* Load balancing
+* Service discovery
+
+=== Architecture
+
+Kubernetes uses a master-slave architecture.
+The control plane manages the worker nodes.
+You can utilize Kubernetes to:
+
+* Deploy applications
+* Scale applications
+* Monitor applications
+
+IMPORTANT: Make sure you have kubectl installed on your workstation.
+
+== Getting Started
+
+Follow these steps carefully:
+
+1. Install Docker on your machine
+2. Install kubectl CLI tool
+3. Setup a local cluster using minikube
+4. Deploy your 1st application
+
+NOTE: This is just a quick introduction. Please refer to the official documentation for more details.
+
+=== Common Commands
+
+Here are some useful commands:
+
+[source,bash]
+----
+kubectl get pods
+kubectl describe pod mypod
+kubectl delete pod mypod
+----
+
+You'll utilize these commands frequently when working with Kubernetes.
+
+== Conclusion
+
+Kubernetes provides alot of functionality for managing containerized apps.
+In the next lecture, we'll dive deeper into pods and deployments.

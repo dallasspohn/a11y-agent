@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "lint": "node src/lint.js",
+    "lint:adoc": "node src/lint-adoc.js",
     "scan": "node src/scan.js",
     "watch": "node src/watch.js",
     "install-hooks": "cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
     "demo": "node src/scan.js --file samples/bad-page.html",
     "demo:lint": "node src/lint.js --file samples/bad-page.html",
+    "demo:lint-adoc": "node src/lint-adoc.js --file samples/bad-lecture.adoc",
     "demo:voice": "node src/scan.js --file samples/bad-page.html --voice",
     "demo:watch": "node src/watch.js --dir samples/",
     "conversation-demo": "node src/conversation-demo.js interactive",
