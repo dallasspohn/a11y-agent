@@ -14,16 +14,50 @@ node src/lint-adoc.js --file samples/bad-lecture.adoc
 # Lint with AI fix suggestions
 node src/lint-adoc.js --file samples/bad-lecture.adoc --fix
 
+# Lint with voice output (James persona)
+node src/lint-adoc.js --file samples/bad-lecture.adoc --voice
+
+# Lint with voice + different voice engine
+node src/lint-adoc.js --file samples/bad-lecture.adoc --voice --voice-name en-US-JennyNeural
+
 # Lint entire directory
 node src/lint-adoc.js --dir content/
 
-# Fail on warnings or higher (for CI/CD)
-node src/lint-adoc.js --file lecture.adoc --fail-on warning
+# Fail on moderate or higher (for CI/CD)
+node src/lint-adoc.js --file lecture.adoc --fail-on moderate
+
+# Full James workflow: voice + AI fixes
+node src/lint-adoc.js --file lecture.adoc --voice --fix
 
 # Using npm scripts
 npm run lint:adoc -- --file samples/bad-lecture.adoc
 npm run demo:lint-adoc
 ```
+
+---
+
+## Voice Output for Accessibility
+
+**NEW:** Vale linting now supports voice output for visually impaired developers!
+
+```bash
+# James can hear style guide violations
+node src/lint-adoc.js --file lecture.adoc --voice
+
+# Uses Microsoft Edge TTS (natural-sounding)
+node src/lint-adoc.js --file lecture.adoc --voice --voice-engine edge
+
+# Choose different voice
+node src/lint-adoc.js --file lecture.adoc --voice --voice-name en-US-JennyNeural
+```
+
+**What you hear:**
+- "Linting [filename] with vale"
+- Summary: "Linting complete. 6 violations found. 0 serious, 6 moderate, 0 minor."
+- Individual violations (if 5 or fewer): "Moderate issue. Avoid using 'This is'. Identify the subject."
+- AI fix generation: "Generating AI fix suggestions... Fix suggestions generated."
+
+**Why this matters:** James (visually impaired) can now lint Red Hat Training content without sighted assistance!
 
 ---
 

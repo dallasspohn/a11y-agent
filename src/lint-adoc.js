@@ -9,6 +9,7 @@ import { promisify } from 'util';
 import { program } from 'commander';
 import { printResults, exitIfFailed } from './lib/report.js';
 import { getFixSuggestions } from './lib/ai-fixes.js';
+import { speak } from './lib/tts.js';
 
 const execAsync = promisify(exec);
 
@@ -19,6 +20,10 @@ program
   .option('--dir <path>', 'Directory of AsciiDoc files to lint')
   .option('--fix', 'Generate AI fix suggestions for vale violations', false)
   .option('--json', 'Output raw JSON results', false)
+  .option('--voice', 'Enable text-to-speech output', false)
+  .option('--voice-engine <engine>', 'TTS engine: edge|piper|espeak (default: edge)', 'edge')
+  .option('--voice-name <name>', 'Voice name (edge-tts: en-US-GuyNeural, en-US-JennyNeural, etc.)', 'en-US-GuyNeural')
+  .option('--rate <speed>', 'Speech rate (words per minute, default 175)', '175')
   .option('--fail-on <severity>', 'Exit 1 if violations at this severity or higher (serious|moderate|minor)')
   .option('--config <path>', 'Path to vale config file (default: ~/.vale.ini)')
   .parse();
@@ -28,6 +33,18 @@ const opts = program.opts();
 if (!opts.file && !opts.dir) {
   console.error('Provide --file or --dir');
   process.exit(1);
+}
+
+/**
+ * Speak text using configured TTS engine (if --voice enabled)
+ */
+async function speakText(text) {
+  return speak(text, {
+    enabled: opts.voice,
+    engine: opts.voiceEngine,
+    voice: opts.voiceName,
+    rate: opts.rate
+  });
 }
 
 /**
@@ -100,6 +117,7 @@ function convertValeResults(valeResults) {
 async function main() {
   const target = opts.file || opts.dir;
   console.log(`  Linting ${target} with vale...\n`);
+  await speakText(`Linting ${target} with vale`);
 
   const valeResults = await lintWithVale(target);
   const results = convertValeResults(valeResults);
@@ -111,9 +129,33 @@ async function main() {
 
   await printResults(results);
 
+  // Speak results summary
+  if (results.violations.length === 0) {
+    await speakText('Linting complete. No style guide violations detected.');
+  } else {
+    // Count by severity
+    const summary = { serious: 0, moderate: 0, minor: 0 };
+    for (const v of results.violations) {
+      if (summary[v.impact] !== undefined) summary[v.impact]++;
+    }
+
+    const summaryText = `Linting complete. ${results.violations.length} violations found. ${summary.serious} serious, ${summary.moderate} moderate, ${summary.minor} minor.`;
+    await speakText(summaryText);
+
+    // Speak individual violations if there are only a few
+    if (opts.voice && results.violations.length <= 5) {
+      for (const v of results.violations.slice(0, 5)) {
+        const impactLabel = v.impact === 'serious' ? 'Serious issue' :
+                            v.impact === 'moderate' ? 'Moderate issue' : 'Minor issue';
+        await speakText(`${impactLabel}. ${v.help}`);
+      }
+    }
+  }
+
   // Generate AI fix suggestions if requested
   if (opts.fix && results.violations.length > 0) {
     console.log('\n  Generating AI fix suggestions for vale violations...\n');
+    await speakText('Generating AI fix suggestions');
 
     // Read the file content
     const { readFile } = await import('fs/promises');
@@ -121,6 +163,7 @@ async function main() {
 
     const fixes = await getFixSuggestions(results.violations, content);
     console.log(fixes);
+    await speakText('Fix suggestions generated. See output for details.');
   }
 
   // Exit with appropriate code if --fail-on specified
