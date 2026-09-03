@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'fs/promises';
