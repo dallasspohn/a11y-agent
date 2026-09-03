@@ -37,6 +37,17 @@ function runLint(filePath) {
   }
 }
 
+function runScan(filePath) {
+  try {
+    const out = execSync(`node src/scan.js --file "${filePath}"`, {
+      cwd: ROOT, encoding: 'utf8', timeout: 30_000,
+    });
+    return parseOutput(out);
+  } catch (e) {
+    return parseOutput(e.stdout || '');
+  }
+}
+
 function parseOutput(out) {
   const countMatch = out.match(/(\d+)\s+violations?\s+found/);
   const rules = [];
@@ -46,26 +57,32 @@ function parseOutput(out) {
   return { count: countMatch ? parseInt(countMatch[1]) : 0, rules };
 }
 
-function checkPage(page, groupLabel) {
+function checkPage(page, groupLabel, groupMeta) {
   const abs = resolve(__dir, page.file);
-  const result = runLint(abs);
+  const lint = runLint(abs);
+  const scan = runScan(abs);
+
+  // Merge rules found by either tool
+  const allRules = [...new Set([...lint.rules, ...scan.rules])];
 
   if (groupLabel === 'good') {
-    // False-positive test — expect zero violations
+    // False-positive test — lint must be 0; scan allowed up to threshold (default 0)
+    const scanThreshold = groupMeta.scan_violation_threshold ?? 0;
     return {
       file: page.file,
       type: 'false-positive-check',
-      pass: result.count === 0,
-      found_count: result.count,
-      found_rules: result.rules,
+      pass: lint.count === 0 && scan.count <= scanThreshold,
+      scan_threshold: scanThreshold,
+      lint: { count: lint.count, rules: lint.rules },
+      scan: { count: scan.count, rules: scan.rules },
     };
   }
 
-  // True-positive test — check each expected rule is detected
+  // True-positive test — check each expected rule is detected by lint OR scan
   const expected = page.expected_rules || [];
-  const detected = expected.filter(r => result.rules.includes(r));
-  const missed   = expected.filter(r => !result.rules.includes(r));
-  const extra    = result.rules.filter(r => !expected.includes(r)); // bonus catches
+  const detected = expected.filter(r => allRules.includes(r));
+  const missed   = expected.filter(r => !allRules.includes(r));
+  const extra    = allRules.filter(r => !expected.includes(r));
   const tpr = expected.length > 0 ? detected.length / expected.length : 1;
 
   return {
@@ -78,7 +95,8 @@ function checkPage(page, groupLabel) {
     detected,
     missed,
     extra,
-    found_count: result.count,
+    lint: { count: lint.count, rules: lint.rules },
+    scan: { count: scan.count, rules: scan.rules },
   };
 }
 
@@ -90,7 +108,7 @@ const ruleAccuracy = {}; // rule → { expected, detected }
 for (const [groupKey, group] of Object.entries(manifest.test_cases)) {
   const groupResults = [];
   for (const page of group.pages) {
-    const r = checkPage(page, group.label);
+    const r = checkPage(page, group.label, group);
     groupResults.push(r);
 
     // Accumulate per-rule stats (only for bad pages with expected_rules)
@@ -141,14 +159,19 @@ for (const [groupKey, group] of Object.entries(allResults)) {
     const short = r.file.replace('pages/', '');
 
     if (r.type === 'false-positive-check') {
-      console.log(`  ${icon}  ${short}  ${c.dim}(${r.found_count} violations — expected 0)${c.reset}`);
+      const lintOk = r.lint.count === 0 ? `${c.pass}lint 0${c.reset}` : `${c.fail}lint ${r.lint.count}${c.reset}`;
+      const scanAllowed = r.scan_threshold > 0 ? `≤${r.scan_threshold}` : '0';
+      const scanOk = r.scan.count <= r.scan_threshold ? `${c.pass}scan ${r.scan.count}${c.reset}` : `${c.fail}scan ${r.scan.count}${c.reset}`;
+      const thresholdNote = r.scan_threshold > 0 ? `${c.dim} (scan threshold: ${scanAllowed})${c.reset}` : '';
+      console.log(`  ${icon}  ${short}  ${c.dim}[${c.reset}${lintOk}${c.dim} | ${c.reset}${scanOk}${c.dim}]${c.reset}${thresholdNote}`);
       if (!r.pass) {
-        console.log(`  ${c.fail}       false positive rules: ${r.found_rules.join(', ')}${c.reset}`);
+        if (r.lint.rules.length) console.log(`  ${c.fail}       lint false positives: ${r.lint.rules.join(', ')}${c.reset}`);
+        if (r.scan.rules.length) console.log(`  ${c.fail}       scan false positives: ${r.scan.rules.join(', ')}${c.reset}`);
       }
     } else {
       const tprStr = `TPR ${(r.tpr * 100).toFixed(0)}%`;
       const tprColor = r.tpr === 1 ? c.pass : r.tpr >= 0.5 ? c.warn : c.fail;
-      console.log(`  ${icon}  ${short}  ${tprColor}[${tprStr}]${c.reset}`);
+      console.log(`  ${icon}  ${short}  ${tprColor}[${tprStr}]${c.reset}  ${c.dim}lint:${r.lint.count} scan:${r.scan.count}${c.reset}`);
       if (r.detected.length) console.log(`  ${c.dim}       ✓ detected: ${r.detected.join(', ')}${c.reset}`);
       if (r.missed.length)   console.log(`  ${c.fail}       ✗ missed:   ${r.missed.join(', ')}${c.reset}`);
       if (r.extra.length)    console.log(`  ${c.dim}       + bonus:    ${r.extra.join(', ')}${c.reset}`);
