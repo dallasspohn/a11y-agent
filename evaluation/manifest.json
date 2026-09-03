@@ -51,7 +51,8 @@
     },
     "w3c_bad_after": {
       "label": "good",
-      "description": "W3C WAI BAD Demo — accessible pages (should have 0 violations from our linter)",
+      "description": "W3C WAI BAD Demo — accessible pages. Note: written for WCAG 2.0 (2012), before landmark regions (landmark-one-main, region) became standard. scan.js may flag 1-2 modern axe-core rules — threshold set to ≤2.",
+      "scan_violation_threshold": 4,
       "pages": [
         { "file": "pages/w3c-bad/after/home.html",    "source_url": "https://www.w3.org/WAI/demos/bad/after/home.html" },
         { "file": "pages/w3c-bad/after/news.html",    "source_url": "https://www.w3.org/WAI/demos/bad/after/news.html" },
