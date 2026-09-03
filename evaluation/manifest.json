@@ -1,0 +1,124 @@
+{
+  "description": "A11Y Agent benchmark dataset — pages with known accessibility status for evaluating scanner accuracy.",
+  "version": "2.0",
+  "evaluation_method": "per-rule detection rate (true positive) + false positive rate on clean pages",
+  "external_sources": [
+    {
+      "name": "W3C WAI Before/After Demonstration (BAD)",
+      "url": "https://www.w3.org/WAI/demos/bad/",
+      "description": "Gold-standard inaccessible/accessible page pairs authored by W3C WCAG experts. Violations are human-documented.",
+      "local_path": "pages/w3c-bad/"
+    },
+    {
+      "name": "A11YBench (reference only)",
+      "url": "https://huggingface.co/datasets/LLM4APR/A11YBench",
+      "description": "60 real-world projects, 147 pages, 8886 violations. Uses IBM Accessibility Checker (different rule names from axe-core — not directly comparable, but useful as scale reference).",
+      "local_path": null
+    },
+    {
+      "name": "AccessGuru (reference only)",
+      "url": "https://github.com/NadeenAhmad/AccessGuruLLM",
+      "description": "3,524 annotated violations from 448 real-world sites. Note: authors themselves do not report recall/precision — full ground truth per page was not established.",
+      "local_path": null
+    }
+  ],
+  "test_cases": {
+    "w3c_bad_before": {
+      "label": "bad",
+      "description": "W3C WAI BAD Demo — inaccessible pages (gold-standard external dataset, authored by WCAG experts)",
+      "pages": [
+        {
+          "file": "pages/w3c-bad/before/home.html",
+          "source_url": "https://www.w3.org/WAI/demos/bad/before/home.html",
+          "expected_rules": ["image-alt", "html-has-lang", "link-name", "table-headers"]
+        },
+        {
+          "file": "pages/w3c-bad/before/news.html",
+          "source_url": "https://www.w3.org/WAI/demos/bad/before/news.html",
+          "expected_rules": ["image-alt", "html-has-lang", "link-name", "table-headers"]
+        },
+        {
+          "file": "pages/w3c-bad/before/tickets.html",
+          "source_url": "https://www.w3.org/WAI/demos/bad/before/tickets.html",
+          "expected_rules": ["image-alt", "html-has-lang", "link-name", "table-headers"]
+        },
+        {
+          "file": "pages/w3c-bad/before/survey.html",
+          "source_url": "https://www.w3.org/WAI/demos/bad/before/survey.html",
+          "expected_rules": ["image-alt", "html-has-lang", "label", "link-name", "table-headers"]
+        }
+      ]
+    },
+    "w3c_bad_after": {
+      "label": "good",
+      "description": "W3C WAI BAD Demo — accessible pages. Note: written for WCAG 2.0 (2012), before landmark regions (landmark-one-main, region) became standard. scan.js may flag 1-2 modern axe-core rules — threshold set to ≤2.",
+      "scan_violation_threshold": 4,
+      "pages": [
+        { "file": "pages/w3c-bad/after/home.html",    "source_url": "https://www.w3.org/WAI/demos/bad/after/home.html" },
+        { "file": "pages/w3c-bad/after/news.html",    "source_url": "https://www.w3.org/WAI/demos/bad/after/news.html" },
+        { "file": "pages/w3c-bad/after/tickets.html", "source_url": "https://www.w3.org/WAI/demos/bad/after/tickets.html" },
+        { "file": "pages/w3c-bad/after/survey.html",  "source_url": "https://www.w3.org/WAI/demos/bad/after/survey.html" }
+      ]
+    },
+    "handcrafted_bad": {
+      "label": "bad",
+      "description": "Hand-crafted pages — each isolates one violation category to test rule-level detection",
+      "pages": [
+        {
+          "file": "pages/bad/01-missing-alt.html",
+          "category": "image-alt",
+          "expected_rules": ["image-alt", "html-has-lang", "heading-order", "link-name"]
+        },
+        {
+          "file": "pages/bad/02-no-form-labels.html",
+          "category": "form-labels",
+          "expected_rules": ["label"]
+        },
+        {
+          "file": "pages/bad/03-heading-chaos.html",
+          "category": "heading-order",
+          "expected_rules": ["heading-order"]
+        },
+        {
+          "file": "pages/bad/04-keyboard-traps.html",
+          "category": "keyboard",
+          "expected_rules": ["click-handler"]
+        },
+        {
+          "file": "pages/bad/05-table-no-headers.html",
+          "category": "tables",
+          "expected_rules": ["table-headers"]
+        },
+        {
+          "file": "pages/bad/06-contrast-and-lang.html",
+          "category": "contrast",
+          "expected_rules": ["html-has-lang"]
+        },
+        {
+          "file": "pages/bad/07-media-no-controls.html",
+          "category": "media",
+          "expected_rules": ["media-controls"]
+        },
+        {
+          "file": "pages/bad/08-mixed-issues.html",
+          "category": "mixed",
+          "expected_rules": ["html-has-lang", "image-alt", "heading-order", "link-name", "label", "click-handler", "table-headers", "media-controls"]
+        }
+      ]
+    },
+    "handcrafted_good": {
+      "label": "good",
+      "description": "Fixed versions of each bad page — our linter should report 0 violations (false positive test)",
+      "pages": [
+        { "file": "pages/good/01-proper-alt.html" },
+        { "file": "pages/good/02-labeled-forms.html" },
+        { "file": "pages/good/03-correct-headings.html" },
+        { "file": "pages/good/04-keyboard-accessible.html" },
+        { "file": "pages/good/05-table-with-headers.html" },
+        { "file": "pages/good/06-good-contrast.html" },
+        { "file": "pages/good/07-media-with-controls.html" },
+        { "file": "pages/good/08-clean-portal.html" }
+      ]
+    }
+  }
+}
