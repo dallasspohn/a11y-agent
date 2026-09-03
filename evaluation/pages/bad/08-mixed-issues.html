@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Employee Portal</title></head>
+<body>
+  <h4>Employee Portal</h4>
+
+  <img src="company-logo.png">
+
+  <nav>
+    <a href="/home"><img src="home-icon.svg"></a>
+    <a href="/profile"></a>
+    <a href="/settings">  </a>
+  </nav>
+
+  <h6>Quick Actions</h6>
+
+  <div onclick="submitTimesheet()" style="cursor: pointer; background: #007bff; color: white; padding: 10px;">
+    Submit Timesheet
+  </div>
+
+  <form>
+    <input type="text" placeholder="Employee ID">
+    <input type="password" placeholder="Password">
+    <select>
+      <option value="">Select Role</option>
+      <option value="dev">Developer</option>
+      <option value="mgr">Manager</option>
+    </select>
+    <button type="submit">Login</button>
+  </form>
+
+  <table>
+    <tr><td>Date</td><td>Hours</td><td>Project</td></tr>
+    <tr><td>2026-09-01</td><td>8</td><td>A11Y Agent</td></tr>
+    <tr><td>2026-09-02</td><td>7.5</td><td>Infra</td></tr>
+  </table>
+
+  <video src="welcome.mp4" autoplay></video>
+</body>
+</html>
