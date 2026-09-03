@@ -1,6 +1,5 @@
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
-import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import { program } from 'commander';
@@ -10,6 +9,7 @@ import readline from 'readline';
 import { listenForCommand, checkVoskAvailability, parseVoiceCommand } from './voice-commands.js';
 import { ConversationState, handleUserInput, generateResponse, States } from './conversation.js';
 import { speak } from './lib/tts.js';
+import { getFixSuggestions as getAIFixes } from './lib/ai-fixes.js';
 
 program
   .option('--url <url>', 'URL to scan')
@@ -145,47 +145,11 @@ async function printResults(results) {
 }
 
 async function getFixSuggestions(violations, html) {
-  const client = new Anthropic();
-
-  const violationSummary = violations.map(v => ({
-    id: v.id,
-    impact: v.impact,
-    help: v.help,
-    wcag: v.tags.filter(t => t.startsWith('wcag')),
-    nodes: v.nodes.map(n => ({
-      target: n.target,
-      html: n.html,
-      failureSummary: n.failureSummary,
-    })),
-  }));
-
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
-    messages: [{
-      role: 'user',
-      content: `You are an accessibility expert. Given the following axe-core violations found in an HTML page, provide specific, actionable fix suggestions for each violation.
-
-For each violation:
-1. Explain WHY it matters (impact on users with disabilities)
-2. Show the EXACT code fix (before → after)
-3. Note the WCAG criterion it addresses
-
-Be concise and practical — developers should be able to copy-paste your fixes.
-
-## Violations Found
-
-${JSON.stringify(violationSummary, null, 2)}
-
-## Source HTML
-
-\`\`\`html
-${html}
-\`\`\``,
-    }],
+  return getAIFixes({
+    violations,
+    source: html,
+    sourceLabel: 'Source HTML'
   });
-
-  return response.content[0].text;
 }
 
 /**
