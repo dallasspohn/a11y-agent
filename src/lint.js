@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import { program } from 'commander';
