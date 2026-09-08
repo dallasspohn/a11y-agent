@@ -31,3 +31,14 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Voice models and temp files
+models/
+*.mp3
+*.wav
+*.ogg
+*.flac
+
+# Test files
+test-*.js
+*-demo.js

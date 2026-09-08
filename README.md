@@ -7,7 +7,7 @@ A11Y Agent is a **dual-persona accessibility pipeline** that combines automated 
 ## Two Personas, One Tool
 
 ### 👩‍💻 Priya (Engineer)
-**Need:** Real-time feedback while writing HTML/AsciiDoc to meet accessibility standards  
+**Need:** Real-time feedback while writing HTML to meet accessibility standards  
 **Solution:** File watcher → instant linting → AI fix suggestions → pre-commit gates → CI/CD enforcement
 
 ### 🎤 James (Visually Impaired Developer)
@@ -21,7 +21,7 @@ A11Y Agent is a **dual-persona accessibility pipeline** that combines automated 
 ```mermaid
 flowchart TB
     subgraph priya["👩‍💻 PRIYA - Visual Workflow"]
-        P1[Write HTML/AsciiDoc] --> P2[Save file]
+        P1[Write HTML] --> P2[Save file]
         P2 --> P3["watch.js auto-lints"]
         P3 --> P4{Clean?}
         P4 -->|"❌ Violations"| P5["Terminal: Colorized + AI fixes"]
@@ -59,8 +59,7 @@ flowchart TB
 - 🎤 **Voice I/O** — Text-to-speech output and speech-to-text input for visually impaired developers
 - 👁️ **Real-time Feedback** — File watcher auto-lints on save with instant visual feedback
 - 🚫 **Git Integration** — Pre-commit hooks and CI/CD gates prevent regressions
-- 🦙 **Local Models** — Support for Ollama (Llama 3.1, Qwen, etc.) to reduce token costs 95%
-- 📄 **Multi-format** — HTML and AsciiDoc support (Red Hat Training content)
+- 🦙 **Local Models** — Support for RamaLama/Ollama (Llama 3.1, Qwen, etc.) to reduce token costs 95%
 
 ## Quick Start
 
@@ -127,7 +126,7 @@ A11Y_AI_MODEL=llama3.1:70b node src/scan.js --file samples/bad-page.html --fix
 ## What Makes This Different
 
 ### Detection is Deterministic, AI Only Explains
-- **lint.js** — Static HTML/AsciiDoc checks (no browser needed) ~100ms
+- **lint.js** — Static HTML checks (no browser needed) ~100ms
 - **scan.js** — Browser-based axe-core scan (contrast, landmarks, etc.) ~2-5s
 - **AI** — Only used for fix suggestions and explanations, NOT detection
 
@@ -145,8 +144,8 @@ A11Y_AI_MODEL=llama3.1:70b node src/scan.js --file samples/bad-page.html --fix
 
 ### Multi-Format Support
 - ✅ HTML files (web UIs)
-- ✅ AsciiDoc files (Red Hat Training content)
-- ✅ Live URLs (production sites)  
+- ✅ Live URLs (production sites)
+- 🚧 React/JSX components (planned)  
 
 ## The James Persona Story
 
@@ -193,7 +192,7 @@ See [VOICE_COMMANDS.md](VOICE_COMMANDS.md) for detailed setup and [anthony-integ
 ## How It Works
 
 ### Detection Pipeline (Deterministic)
-1. **Static lint** (lint.js) — Parse HTML/AsciiDoc, check for missing alt text, invalid ARIA, heading order, etc.
+1. **Static lint** (lint.js) — Parse HTML, check for missing alt text, invalid ARIA, heading order, etc.
 2. **Browser scan** (scan.js) — Playwright launches chromium, axe-core checks computed styles, contrast ratios, focus order
 3. **Impact ranking** — Sort by Critical → Serious → Moderate → Minor
 
@@ -296,14 +295,14 @@ Run the scanner to see them all detected and get AI-powered fix suggestions!
 - [x] GitHub Actions CI/CD — PR checks
 - [x] Good/bad sample pages for testing
 
-### 🔄 In Progress (14 Days to Deadline)
+### 🔄 In Progress (12 Days to Deadline)
 - [ ] Merge both branches and test integration
-- [ ] AsciiDoc support (Red Hat Training content)
-- [ ] Test on real Red Hat sites (redhat.com, PatternFly)
+- [ ] Test on real Red Hat sites (redhat.com, PatternFly, console.redhat.com)
 - [ ] Record demo video (2-3 minutes, both personas)
 - [ ] Create architecture diagram
 - [ ] Draft impact statement
 - [ ] Collect benchmark datasets (20-30 good/bad examples)
+- [ ] Fix RamaLama integration for AI suggestions
 
 ### 🎯 Post-Demo Roadmap
 - [ ] Batch scanning (multiple URLs / sitemaps)

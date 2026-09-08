@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
-import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import { program } from 'commander';
@@ -9,6 +9,8 @@ import { exec } from 'child_process';
 import readline from 'readline';
 import { listenForCommand, checkVoskAvailability, parseVoiceCommand } from './voice-commands.js';
 import { ConversationState, handleUserInput, generateResponse, States } from './conversation.js';
+import { speak } from './lib/tts.js';
+import { getFixSuggestions as getAIFixes } from './lib/ai-fixes.js';
 
 program
   .option('--url <url>', 'URL to scan')
@@ -16,6 +18,8 @@ program
   .option('--fix', 'Generate AI fix suggestions via Claude', false)
   .option('--json', 'Output raw JSON results', false)
   .option('--voice', 'Enable text-to-speech output', false)
+  .option('--voice-engine <engine>', 'TTS engine: edge|piper|espeak (default: edge)', 'edge')
+  .option('--voice-name <name>', 'Voice name (edge-tts: en-US-GuyNeural, en-US-JennyNeural, etc.)', 'en-US-GuyNeural')
   .option('--rate <speed>', 'Speech rate (words per minute, default 175)', '175')
   .option('--listen', 'Enable voice command mode (speech-to-text)', false)
   .option('--model-path <path>', 'Path to Vosk model directory')
@@ -49,21 +53,14 @@ function stripAnsi(text) {
 }
 
 /**
- * Speak text using espeak-ng TTS (if --voice enabled)
+ * Speak text using configured TTS engine (if --voice enabled)
  */
 async function speakText(text) {
-  if (!opts.voice) return;
-
-  const cleanText = stripAnsi(text);
-  const escapedText = cleanText.replace(/"/g, '\\"').replace(/'/g, "\\'");
-
-  return new Promise((resolve) => {
-    exec(`espeak-ng -s ${opts.rate} "${escapedText}"`, (error) => {
-      if (error) {
-        console.error(chalk.dim(`[TTS Error: ${error.message}]`));
-      }
-      resolve();
-    });
+  return speak(text, {
+    enabled: opts.voice,
+    engine: opts.voiceEngine,
+    voice: opts.voiceName,
+    rate: opts.rate
   });
 }
 
@@ -149,47 +146,11 @@ async function printResults(results) {
 }
 
 async function getFixSuggestions(violations, html) {
-  const client = new Anthropic();
-
-  const violationSummary = violations.map(v => ({
-    id: v.id,
-    impact: v.impact,
-    help: v.help,
-    wcag: v.tags.filter(t => t.startsWith('wcag')),
-    nodes: v.nodes.map(n => ({
-      target: n.target,
-      html: n.html,
-      failureSummary: n.failureSummary,
-    })),
-  }));
-
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
-    messages: [{
-      role: 'user',
-      content: `You are an accessibility expert. Given the following axe-core violations found in an HTML page, provide specific, actionable fix suggestions for each violation.
-
-For each violation:
-1. Explain WHY it matters (impact on users with disabilities)
-2. Show the EXACT code fix (before → after)
-3. Note the WCAG criterion it addresses
-
-Be concise and practical — developers should be able to copy-paste your fixes.
-
-## Violations Found
-
-${JSON.stringify(violationSummary, null, 2)}
-
-## Source HTML
-
-\`\`\`html
-${html}
-\`\`\``,
-    }],
+  return getAIFixes({
+    violations,
+    source: html,
+    sourceLabel: 'Source HTML'
   });
-
-  return response.content[0].text;
 }
 
 /**
