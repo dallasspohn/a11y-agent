@@ -4,9 +4,11 @@ Speech-to-text voice control for hands-free accessibility scanning.
 
 ## Features
 
-- **Push-to-talk interface**: Press and hold SPACE to speak
-- **Natural language commands**: Speak commands like "scan bad-page.html and show me the fixes"
-- **Audio feedback**: Beeps indicate recording start/stop
+- **SPACE toggles recording**: press to start; it stops on a pause in speech, a
+  second SPACE, or the 15s safety timeout
+- **Natural language commands**: Speak commands like "scan bad page and show me the fixes"
+- **Spoken punctuation**: "red hat dot com" becomes `https://redhat.com`
+- **Audio feedback**: Short tones indicate recording start/stop
 - **Offline processing**: Uses Vosk for local, privacy-first STT
 - **Low latency**: ~100-200ms recognition delay
 
@@ -67,10 +69,14 @@ node src/scan.js --listen
 ```
 
 Then:
-1. Press and hold SPACE
+1. Press SPACE to start recording
 2. Speak your command
-3. Release SPACE
+3. Stop talking — recording ends on the pause (or press SPACE again)
 4. Command executes automatically
+
+> **Why not push-to-talk?** Terminals emit key-*down* events only; there is no
+> key-release event to detect. Holding SPACE would record for ~50ms and stop.
+> The toggle plus silence-detection is the working equivalent.
 
 ### Supported Commands
 
@@ -82,6 +88,7 @@ Then:
 | "scan bad-page.html and show me the fixes" | `--file bad-page.html --fix` |
 | "scan example.com output as json" | `--url http://example.com --json` |
 | "scan bad-page.html with voice" | `--file bad-page.html --voice` |
+| "scan test-page.html with voice" | `--file test-page.html --voice` |
 
 ### Advanced Usage
 
@@ -133,21 +140,41 @@ Download and extract model to `./models/` directory (see Installation step 3)
 - Test with `arecord -l` to list devices
 - Verify PulseAudio/ALSA configuration
 
+### "No speech detected" every time (with OBS, Zoom, or a browser call open)
+
+Another app is holding the sound card exclusively. Confirm it:
+
+```bash
+arecord -l | grep -A1 '^card'    # "Subdevices: 0/1" means no free subdevice
+pactl list source-outputs | grep application.name
+```
+
+Capture now goes through PipeWire's `default` device, which mixes inputs, so
+this should not happen. If you overrode `A11Y_MIC_DEVICE` with a raw
+`plughw:N,M`, unset it — raw ALSA devices cannot be shared.
+
+```bash
+unset A11Y_MIC_DEVICE
+arecord -D default -d 3 -f S16_LE -r 16000 /tmp/mic-check.wav   # must exit 0
+```
+
 ### Low accuracy
 - Upgrade to full model (vosk-model-en-us-0.22)
 - Speak clearly and avoid background noise
 - Add custom vocabulary for technical terms (see Vosk docs)
 
 ### No audio feedback (beeps)
-- Install `beep` package: `sudo dnf install beep`
-- Or use `speaker-test` (usually pre-installed)
+Tones are synthesized in-process and piped to `aplay`, so no `beep` package is
+needed — but ALSA must be present: `sudo dnf install alsa-utils`.
+- Silence them entirely with `A11Y_NO_BEEP=1`
+- Change the length with `A11Y_BEEP_MS=120` (default 70)
 
 ## Architecture
 
 ### Components
 
 1. **voice-commands.js**: STT engine integration
-   - `listenForCommand()`: Main push-to-talk loop
+   - `listenForCommand()`: Main record/recognize loop (SPACE toggle)
    - `parseVoiceCommand()`: NLP for command extraction
    - `checkVoskAvailability()`: Dependency validation
 
@@ -190,5 +217,7 @@ All speech recognition happens **locally**. No audio is sent to external servers
 
 ## Related
 
-- Text-to-speech output: `--voice` flag (uses espeak-ng)
-- API integration: See `VOICE_COMMANDS_API.md` for programmatic usage
+- Text-to-speech output: `--voice` flag — edge-tts neural by default, with an
+  automatic espeak-ng fallback. See [VOICE_UPGRADE.md](VOICE_UPGRADE.md).
+- Full hands-free triage loop: `npm run agent` — see the README
+- Verify the recognizer without a microphone: `npm run test:vosk`

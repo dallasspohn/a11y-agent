@@ -5,10 +5,14 @@ const MAX_SOURCE_CHARS = 60_000;
 const DEFAULT_URL = 'http://localhost:11434/v1';
 const DEFAULT_MODEL = 'llama3.1';
 
-function createClient() {
+export function createClient() {
   const baseURL = process.env.A11Y_AI_URL || DEFAULT_URL;
   const apiKey = process.env.A11Y_AI_KEY || 'ollama';
   return new OpenAI({ baseURL, apiKey });
+}
+
+export function activeModel() {
+  return process.env.A11Y_AI_MODEL || DEFAULT_MODEL;
 }
 
 export async function getFixSuggestions({ violations, source, sourceLabel = 'Source' }) {

@@ -1,8 +1,5 @@
 import 'dotenv/config';
-import { chromium } from 'playwright';
-import AxeBuilder from '@axe-core/playwright';
-import { readFile } from 'fs/promises';
-import { resolve } from 'path';
+import { scanTarget } from './lib/scanner.js';
 import { program } from 'commander';
 import chalk from 'chalk';
 import { exec } from 'child_process';
@@ -15,7 +12,7 @@ import { getFixSuggestions as getAIFixes } from './lib/ai-fixes.js';
 program
   .option('--url <url>', 'URL to scan')
   .option('--file <path>', 'Local HTML file to scan')
-  .option('--fix', 'Generate AI fix suggestions via Claude', false)
+  .option('--fix', 'Generate AI fix suggestions (local Ollama by default; see A11Y_AI_URL)', false)
   .option('--json', 'Output raw JSON results', false)
   .option('--voice', 'Enable text-to-speech output', false)
   .option('--voice-engine <engine>', 'TTS engine: edge|piper|espeak (default: edge)', 'edge')
@@ -25,6 +22,7 @@ program
   .option('--model-path <path>', 'Path to Vosk model directory')
   .option('--interactive', 'Enable interactive conversation mode', false)
   .option('--fail-on <impact>', 'Exit 1 if violations at this impact or higher (critical|serious|moderate|minor)')
+  .option('--timeout <ms>', 'Page navigation timeout in milliseconds', '60000')
   .parse();
 
 let opts = program.opts();
@@ -55,37 +53,27 @@ function stripAnsi(text) {
 /**
  * Speak text using configured TTS engine (if --voice enabled)
  */
-async function speakText(text) {
-  return speak(text, {
+function voiceOptions() {
+  return {
     enabled: opts.voice,
     engine: opts.voiceEngine,
     voice: opts.voiceName,
     rate: opts.rate
-  });
+  };
+}
+
+async function speakText(text) {
+  return speak(text, voiceOptions());
 }
 
 async function scanPage() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
-  const page = await context.newPage();
-
-  if (opts.file) {
-    const filePath = resolve(opts.file);
-    await page.goto(`file://${filePath}`);
-  } else {
-    await page.goto(opts.url);
-  }
-
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
-    .analyze();
-
-  const html = opts.file
-    ? await readFile(resolve(opts.file), 'utf-8')
-    : await page.content();
-
-  await browser.close();
-  return { results, html };
+  return scanTarget({
+    url: opts.url,
+    file: opts.file,
+    timeout: Number(opts.timeout) || 60000,
+    // Status goes to stderr so it never corrupts --json on stdout
+    onProgress: (msg) => console.error(chalk.dim(`  (${msg})`)),
+  });
 }
 
 async function printResults(results) {
@@ -218,7 +206,7 @@ async function main() {
     console.log(chalk.dim(`  Using Vosk model: ${modelPath}`));
 
     try {
-      const voiceArgs = await listenForCommand(modelPath);
+      const voiceArgs = await listenForCommand(modelPath, { voice: voiceOptions() });
 
       // Merge voice command args with CLI args (voice takes precedence for conflicts)
       opts = { ...opts, ...voiceArgs };
@@ -237,7 +225,8 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(chalk.dim(`\n  Scanning ${opts.url || opts.file}...`));
+  // stderr, so `--json > report.json` stays valid JSON
+  console.error(chalk.dim(`\n  Scanning ${opts.url || opts.file}...`));
   await speakText(`Scanning ${opts.url || opts.file}`);
 
   const { results, html } = await scanPage();
@@ -315,7 +304,7 @@ async function main() {
         console.log(chalk.dim('\n[Listening for command...]'));
 
         try {
-          const voiceInput = await listenForCommand(modelPath);
+          const voiceInput = await listenForCommand(modelPath, { announce: false, voice: voiceOptions() });
           const text = voiceInput.text || voiceInput.url || voiceInput.file || '';
 
           if (!text) {

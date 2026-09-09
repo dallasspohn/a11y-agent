@@ -23,8 +23,39 @@ jobs:
       - name: Install Chromium for axe scans
         run: npx playwright install --with-deps chromium
 
+      - name: Unit tests
+        run: node --test tests/*.test.js
+
       - name: Static lint (accessible sample must pass)
         run: node src/lint.js --file samples/good-page.html --fail-on minor
 
       - name: axe-core scan (accessible sample must pass)
         run: node src/scan.js --file samples/good-page.html --fail-on serious
+
+  benchmark:
+    name: Detection accuracy benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium for axe scans
+        run: npx playwright install --with-deps chromium
+
+      # Gates the accuracy numbers used in the submission. Skips cleanly until
+      # the evaluation/ dataset lands, so this job is safe to add ahead of it.
+      - name: Benchmark thresholds (TPR >= 95%, FPR <= 5%)
+        env:
+          A11Y_EVAL: '1'
+        run: node --test tests/benchmark.test.js
+
+      - name: Full benchmark report
+        if: always()
+        run: node evaluation/run-eval.js || true
