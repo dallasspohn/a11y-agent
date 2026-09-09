@@ -90,10 +90,8 @@ const TARGET_ALIASES = {
   'sample page': 'samples/bad-page.html',
   'good page': 'samples/good-page.html',
   'the good page': 'samples/good-page.html',
-  // "test" is also a scan verb, so only the two-word forms reach here —
-  // a bare "test page" parses as verb "test" + target "page".
-  'test page': 'samples/test-page.html',
-  'the test page': 'samples/test-page.html',
+  'web page': 'samples/web-page.html',
+  'the web page': 'samples/web-page.html',
 };
 
 // The small Vosk model rarely returns an alias verbatim — "bad page" comes back
@@ -103,7 +101,7 @@ const TARGET_ALIASES = {
 const FUZZY_ALIASES = [
   { match: /\b(bad|bat|bed|bab)\b/, path: 'samples/bad-page.html' },
   { match: /\bgood\b/, path: 'samples/good-page.html' },
-  { match: /\b(test|text|tests|tested)\b/, path: 'samples/test-page.html' },
+  { match: /\b(web|webb|wed|whip)\b/, path: 'samples/web-page.html' },
 ];
 
 const KNOWN_TLDS = new Set([
@@ -209,6 +207,14 @@ export function parseVoiceCommand(text) {
     } else {
       args.file = target;
     }
+  } else {
+    // Vosk regularly swallows the leading verb — "scan the web page" comes back
+    // as just "the web page", which used to dead-end as "I did not catch a scan
+    // target". Accept a bare utterance, but only when it names a known demo
+    // page, so ordinary speech is never mistaken for a target.
+    const bare = TARGET_ALIASES[normalizedText]
+      ?? FUZZY_ALIASES.find((a) => a.match.test(normalizedText))?.path;
+    if (bare) args.file = bare;
   }
 
   return args;

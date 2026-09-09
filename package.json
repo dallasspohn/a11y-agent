@@ -21,7 +21,7 @@
     "eval": "node evaluation/run-eval.js",
     "eval:json": "node evaluation/run-eval.js --json",
     "eval:check": "A11Y_EVAL=1 node --test tests/benchmark.test.js",
-    "demo:reset": "git checkout -- samples/bad-page.html && rm -f samples/*.bak && echo 'samples/bad-page.html restored'",
+    "demo:reset": "git checkout -- samples/bad-page.html samples/web-page.html && rm -f samples/*.bak && echo 'samples/bad-page.html and samples/web-page.html restored'",
     "demo:agent": "npm run demo:reset --silent && node src/agent.js"
   },
   "dependencies": {

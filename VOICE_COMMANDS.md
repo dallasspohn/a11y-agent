@@ -88,7 +88,9 @@ Then:
 | "scan bad-page.html and show me the fixes" | `--file bad-page.html --fix` |
 | "scan example.com output as json" | `--url http://example.com --json` |
 | "scan bad-page.html with voice" | `--file bad-page.html --voice` |
-| "scan test-page.html with voice" | `--file test-page.html --voice` |
+| "scan web-page.html with voice" | `--file web-page.html --voice` |
+| "scan the web page" | `--file samples/web-page.html` (alias) |
+| "the web page" | `--file samples/web-page.html` (alias, verb optional) |
 
 ### Advanced Usage
 
