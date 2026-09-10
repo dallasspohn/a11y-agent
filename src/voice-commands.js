@@ -1,6 +1,8 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import chalk from 'chalk';
+
+import { speak as ttsSpeak } from './lib/tts.js';
 
 const execAsync = promisify(exec);
 
@@ -9,31 +11,138 @@ const execAsync = promisify(exec);
  * Maps spoken commands to CLI arguments
  */
 
+const BEEP_RATE = 16000;
+
 /**
- * Play audio feedback for listening state changes
+ * ALSA capture device for speech input.
+ *
+ * 'default' routes through PipeWire/PulseAudio, which mixes inputs, so the mic
+ * can be shared with a screen recorder. Set A11Y_MIC_DEVICE to a raw device
+ * (e.g. 'plughw:1,0') only if you need to bypass the sound server.
  */
-async function playBeep(frequency = 800, duration = 100) {
+export const MIC_DEVICE = process.env.A11Y_MIC_DEVICE || 'default';
+
+/**
+ * Play a short tone for listening state changes.
+ *
+ * Synthesizes the PCM directly and pipes it to aplay so the duration is exact.
+ * The old `beep`/`speaker-test` approach ignored the duration entirely
+ * (speaker-test plays a full loop), producing a ~1s tone before recording.
+ *
+ * Fire-and-forget by design — awaiting this would delay the mic start.
+ * Set A11Y_NO_BEEP=1 to silence, A11Y_BEEP_MS to change the length.
+ */
+function playBeep(frequency = 800, durationMs = Number(process.env.A11Y_BEEP_MS) || 70) {
+  if (process.env.A11Y_NO_BEEP === '1' || durationMs <= 0) return;
+
+  const samples = Math.floor((BEEP_RATE * durationMs) / 1000);
+  const pcm = Buffer.alloc(samples * 2);
+  // Fade the edges so the tone doesn't click
+  const fade = Math.min(Math.floor(samples * 0.2), 160);
+
+  for (let i = 0; i < samples; i++) {
+    let gain = 0.25;
+    if (i < fade) gain *= i / fade;
+    else if (i > samples - fade) gain *= (samples - i) / fade;
+    pcm.writeInt16LE(Math.round(Math.sin((2 * Math.PI * frequency * i) / BEEP_RATE) * gain * 32767), i * 2);
+  }
+
   try {
-    // Use beep command if available, fallback to speaker-test
-    await execAsync(`beep -f ${frequency} -l ${duration} 2>/dev/null || speaker-test -t sine -f ${frequency} -l 1 >/dev/null 2>&1 &`);
-  } catch (err) {
-    // Silent fail - audio feedback is nice-to-have
+    const player = spawn(
+      'aplay',
+      ['-q', '-f', 'S16_LE', '-r', String(BEEP_RATE), '-c', '1', '-t', 'raw', '-'],
+      { stdio: ['pipe', 'ignore', 'ignore'] }
+    );
+    // Audio feedback is nice-to-have — never let it break the command flow
+    player.on('error', () => {});
+    player.stdin.on('error', () => {});
+    player.stdin.end(pcm);
+  } catch {
+    // Silent fail
   }
 }
 
 /**
- * Speak text using espeak-ng
+ * Speak an announcement through the shared TTS module.
+ *
+ * This used to shell out to espeak-ng directly, which meant the listening
+ * prompts spoke in a different (robotic) voice than the rest of the agent.
+ * Routing through lib/tts.js keeps one voice for the whole conversation.
  */
-async function speak(text, rate = 175) {
-  const escapedText = text.replace(/"/g, '\\"').replace(/'/g, "\\'");
-  return new Promise((resolve) => {
-    exec(`espeak-ng -s ${rate} "${escapedText}"`, (error) => {
-      if (error) {
-        console.error(chalk.dim(`[TTS Error: ${error.message}]`));
-      }
-      resolve();
-    });
-  });
+async function speak(text, voiceOptions = {}) {
+  return ttsSpeak(text, voiceOptions);
+}
+
+// Speech-to-text emits words, never punctuation — "red hat dot com" has to be
+// reassembled into "redhat.com" before it can be used as a target.
+const SPOKEN_SYMBOLS = {
+  dot: '.', point: '.', period: '.',
+  slash: '/', backslash: '\\',
+  dash: '-', hyphen: '-', minus: '-',
+  underscore: '_', colon: ':', tilde: '~',
+};
+
+// Short spoken names for demo targets the small Vosk model can't transcribe
+// as literal paths ("samples/bad-page.html" never comes through intact).
+const TARGET_ALIASES = {
+  'bad page': 'samples/bad-page.html',
+  'the bad page': 'samples/bad-page.html',
+  'sample page': 'samples/bad-page.html',
+  'good page': 'samples/good-page.html',
+  'the good page': 'samples/good-page.html',
+  'web page': 'samples/web-page.html',
+  'the web page': 'samples/web-page.html',
+};
+
+// The small Vosk model rarely returns an alias verbatim — "bad page" comes back
+// as "bad file", "bat page", "the bad pages". Enumerating every mistranscription
+// is hopeless, so match on the distinguishing word instead. Only consulted when
+// the phrase isn't dictating a literal path or domain.
+const FUZZY_ALIASES = [
+  { match: /\b(bad|bat|bed|bab)\b/, path: 'samples/bad-page.html' },
+  { match: /\bgood\b/, path: 'samples/good-page.html' },
+  { match: /\b(web|webb|wed|whip)\b/, path: 'samples/web-page.html' },
+];
+
+const KNOWN_TLDS = new Set([
+  'com', 'org', 'net', 'io', 'dev', 'edu', 'gov', 'co', 'ai', 'app', 'us',
+]);
+
+function looksLikeDomain(target) {
+  const host = target.split('/')[0];
+  const parts = host.split('.');
+  return parts.length > 1 && KNOWN_TLDS.has(parts[parts.length - 1]);
+}
+
+/**
+ * Convert a spoken target phrase into a usable URL or file path.
+ *
+ * "red hat dot com"                  → "redhat.com"
+ * "samples slash bad dash page dot html" → "samples/bad-page.html"
+ * "the bad page"                     → "samples/bad-page.html" (alias)
+ */
+export function normalizeSpokenTarget(raw) {
+  const spoken = raw.trim().toLowerCase().replace(/\s+/g, ' ');
+
+  if (TARGET_ALIASES[spoken]) return TARGET_ALIASES[spoken];
+
+  // Already a well-formed target (typed input, or a single unbroken token)
+  if (/^(https?|file):\/\//.test(spoken) || !spoken.includes(' ')) return spoken;
+
+  // "dot"/"slash" mean the user is spelling out a real path or domain, so take
+  // them literally. Otherwise fall back to keyword matching on the demo pages —
+  // without this, "scan bad file" silently becomes the path "badfile".
+  if (!/\b(dot|slash|backslash)\b/.test(spoken)) {
+    const fuzzy = FUZZY_ALIASES.find((a) => a.match.test(spoken));
+    if (fuzzy) return fuzzy.path;
+  }
+
+  // Spoken targets have no real word breaks — join tokens, mapping symbol words
+  return spoken
+    .split(' ')
+    .filter((t) => t && t !== 'the' && t !== 'a')
+    .map((t) => SPOKEN_SYMBOLS[t] ?? t)
+    .join('');
 }
 
 /**
@@ -50,9 +159,9 @@ async function speak(text, rate = 175) {
  */
 export function parseVoiceCommand(text) {
   const normalizedText = text.toLowerCase().trim();
-  const args = {};
-
-  console.log(chalk.dim(`[Voice Input] "${text}"`));
+  // Keep the raw transcript — conversation mode routes on the words themselves,
+  // not just the extracted flags.
+  const args = { text: normalizedText };
 
   // Check for flags BEFORE we parse target (so we catch them before removal)
   // Check for fix request
@@ -85,17 +194,27 @@ export function parseVoiceCommand(text) {
     // Pattern: remove everything after common command separators
     target = target.replace(/\s+(and|with|then|enable)\s+(show|get|generate|suggest|repair|enable|output|voice|speak).*$/i, '');
     target = target.replace(/\s+(output|as|in)\s+(as\s+)?json.*$/i, '');
-    target = target.trim();
+    target = normalizeSpokenTarget(target);
 
     // Determine if target is URL or file
     if (target.startsWith('http://') || target.startsWith('https://')) {
       args.url = target;
     } else if (target.startsWith('file://')) {
       args.file = target.replace('file://', '');
+    } else if (looksLikeDomain(target)) {
+      // Spoken domains arrive bare ("redhat.com") — they are URLs, not files
+      args.url = `https://${target}`;
     } else {
-      // Assume file path if not URL
       args.file = target;
     }
+  } else {
+    // Vosk regularly swallows the leading verb — "scan the web page" comes back
+    // as just "the web page", which used to dead-end as "I did not catch a scan
+    // target". Accept a bare utterance, but only when it names a known demo
+    // page, so ordinary speech is never mistaken for a target.
+    const bare = TARGET_ALIASES[normalizedText]
+      ?? FUZZY_ALIASES.find((a) => a.match.test(normalizedText))?.path;
+    if (bare) args.file = bare;
   }
 
   return args;
@@ -115,13 +234,19 @@ export async function checkVoskAvailability() {
       };
     }
 
-    // Check if model directory exists
+    // Check if model directory exists.
+    // Resolve bundled models against the package root, not cwd, so --listen
+    // works when invoked from another directory.
     const fs = await import('fs/promises');
+    const { fileURLToPath } = await import('url');
+    const { dirname, join } = await import('path');
+    const pkgRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+
     const modelPaths = [
+      process.env.VOSK_MODEL_PATH,
       '/usr/share/vosk/model',
-      './models/vosk-model-small-en-us-0.15',
-      './models/vosk-model-en-us-0.22',
-      process.env.VOSK_MODEL_PATH
+      join(pkgRoot, 'models/vosk-model-small-en-us-0.15'),
+      join(pkgRoot, 'models/vosk-model-en-us-0.22'),
     ].filter(Boolean);
 
     for (const path of modelPaths) {
@@ -146,147 +271,241 @@ export async function checkVoskAvailability() {
 }
 
 /**
- * Listen for a single voice command using push-to-talk
- * Returns parsed command arguments
+ * Listen for a single voice command.
+ *
+ * Terminals emit key-down events only — there is no key-release event — so this
+ * is a toggle rather than true push-to-talk: SPACE starts recording, and
+ * recording ends on a pause in speech, another SPACE, or the safety timeout.
+ *
+ * Returns parsed command arguments (including the raw transcript as `text`).
  */
 export async function listenForCommand(modelPath, options = {}) {
-  const { timeout = 5000, sampleRate = 16000 } = options;
+  const { timeout = 15000, sampleRate = 16000, announce = true, voice = {} } = options;
 
   console.log(chalk.blue('\n  VOICE COMMAND MODE'));
-  console.log(chalk.dim('  Press and hold SPACE to speak, release when done'));
+  console.log(chalk.dim('  Press SPACE to start speaking — stops on a pause, or press SPACE again'));
   console.log(chalk.dim('  Press CTRL+C to exit\n'));
 
-  await speak('Voice command mode ready. Press and hold space to speak.');
+  if (announce) {
+    await speak('Voice command mode ready. Press space to speak.', voice);
+  }
 
-  try {
-    const vosk = (await import('vosk')).default;
-    const mic = (await import('mic')).default;
-    const { default: readline } = await import('readline');
+  const vosk = (await import('vosk')).default;
+  const mic = (await import('mic')).default;
+  const { default: readline } = await import('readline');
 
-    const model = new vosk.Model(modelPath);
-    const recognizer = new vosk.KaldiRecognizer(model, sampleRate);
+  vosk.setLogLevel(-1); // Suppress Kaldi's verbose stderr output
 
-    // Set up readline for key detection
-    readline.emitKeypressEvents(process.stdin);
-    if (process.stdin.isTTY) {
-      process.stdin.setRawMode(true);
+  const model = new vosk.Model(modelPath);
+  const recognizer = new vosk.Recognizer({ model, sampleRate });
+
+  readline.emitKeypressEvents(process.stdin);
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+  process.stdin.resume();
+
+  return new Promise((resolve, reject) => {
+    let isRecording = false;
+    let micInstance = null;
+    let timeoutId = null;
+    let settled = false;
+    let transcript = '';
+    let detachStream = null;
+    let cleanedUp = false;
+    // Vosk is native code behind FFI. Once free() runs, any further call into
+    // the recognizer dereferences freed memory and takes the whole process down
+    // with a SIGSEGV inside Kaldi — no catchable JS error. This flag is the
+    // guard for every recognizer call below.
+    let recognizerAlive = true;
+
+    /**
+     * Stop feeding the recognizer.
+     *
+     * Killing arecord does NOT stop the Node stream: bytes already buffered
+     * keep emitting 'data' on later ticks. Detaching the listeners is what
+     * actually ends the flow, and it must happen before free().
+     */
+    const stopFeeding = () => {
+      if (detachStream) {
+        detachStream();
+        detachStream = null;
+      }
+      if (micInstance) {
+        micInstance.stop();
+        micInstance = null;
+      }
+    };
+
+    const cleanup = () => {
+      if (cleanedUp) return; // Ctrl-C calls this outside the `settled` guard
+      cleanedUp = true;
+
+      if (timeoutId) clearTimeout(timeoutId);
+      stopFeeding();
+
+      // Remove only our handler so repeated calls don't stack listeners
+      process.stdin.removeListener('keypress', onKeypress);
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+      }
+      process.stdin.pause();
+
+      recognizerAlive = false;
+      recognizer.free();
+      model.free();
+    };
+
+    const finish = (parsedArgs) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(parsedArgs);
+    };
+
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(err);
+    };
+
+    const startRecording = () => {
+      if (isRecording || settled || !recognizerAlive) return;
+
+      // A retry reuses the recognizer, so make sure the previous attempt's
+      // stream is fully detached before a new one starts feeding it.
+      stopFeeding();
+
+      isRecording = true;
+      transcript = '';
+      recognizer.reset();
+      console.log(chalk.green('  Listening...'));
+      playBeep(1000, 150); // High beep for start
+
+      micInstance = mic({
+        rate: String(sampleRate),
+        channels: '1',
+        debug: false,
+        exitOnSilence: 6,
+        // The mic module defaults to the raw ALSA device 'plughw:1,0', which
+        // grabs the sound card exclusively. Anything already holding it — OBS,
+        // a browser tab, Zoom — makes arecord fail with "Device or resource
+        // busy". Going through PipeWire/PulseAudio's 'default' instead lets us
+        // share the mic, so you can record the demo while the agent listens.
+        device: MIC_DEVICE,
+      });
+
+      const micInputStream = micInstance.getAudioStream();
+
+      // mic pipes arecord's stderr nowhere and never emits 'error' when the
+      // recorder dies, so a busy device would otherwise look like plain silence
+      // until the timeout. Track whether any audio actually arrived.
+      let gotAudio = false;
+
+      const onProcessExit = () => {
+        if (!isRecording || gotAudio) return;
+        console.log(chalk.red(`\n  Microphone unavailable — arecord could not open "${MIC_DEVICE}".`));
+        console.log(chalk.yellow('  Another app (OBS, Zoom, a browser tab) may be holding it exclusively.'));
+        console.log(chalk.dim(`  Check with: arecord -D ${MIC_DEVICE} -d 2 /tmp/mic-check.wav`));
+        console.log(chalk.dim('  Override the device with A11Y_MIC_DEVICE=plughw:1,0\n'));
+        stopRecording();
+      };
+
+      const onData = (data) => {
+        // Buffered chunks can arrive after stop; feeding a freed recognizer
+        // segfaults the process, so bail unless this is still the live capture.
+        if (!recognizerAlive || !isRecording) return;
+        gotAudio = true;
+        // acceptWaveform() returns true once an utterance is complete;
+        // result() and finalResult() already return parsed objects.
+        if (recognizer.acceptWaveform(data)) {
+          const { text } = recognizer.result();
+          if (text) transcript = `${transcript} ${text}`.trim();
+        }
+      };
+
+      // mic emits 'silence' after exitOnSilence frames of quiet — this is what
+      // ends the utterance in normal use.
+      const onSilence = () => stopRecording();
+
+      const onError = (err) => {
+        console.error(chalk.red(`  Microphone error: ${err.message}`));
+        fail(err);
+      };
+
+      // Retrying after "no speech" builds a fresh stream. Without this, the old
+      // stream's handlers stay attached and race the new one into the same
+      // recognizer, which trips a Kaldi assertion and aborts.
+      detachStream = () => {
+        micInputStream.removeListener('audioProcessExitComplete', onProcessExit);
+        micInputStream.removeListener('data', onData);
+        micInputStream.removeListener('silence', onSilence);
+        micInputStream.removeListener('error', onError);
+        // Dropping the last 'data' listener returns the stream to paused mode,
+        // which is what actually halts delivery of the buffered chunks.
+        micInputStream.pause();
+      };
+
+      micInputStream.on('audioProcessExitComplete', onProcessExit);
+      micInputStream.on('data', onData);
+      micInputStream.on('silence', onSilence);
+      micInputStream.on('error', onError);
+
+      micInstance.start();
+
+      timeoutId = setTimeout(() => {
+        console.log(chalk.yellow('  Timeout - stopping recording'));
+        stopRecording();
+      }, timeout);
+    };
+
+    const stopRecording = () => {
+      if (!isRecording || settled) return;
+
+      isRecording = false;
+      clearTimeout(timeoutId);
+      timeoutId = null;
+
+      // Detach before draining the recognizer, so no late chunk lands mid-call
+      stopFeeding();
+
+      if (recognizerAlive) {
+        const { text } = recognizer.finalResult();
+        if (text) transcript = `${transcript} ${text}`.trim();
+      }
+
+      playBeep(800, 100); // Lower beep for stop
+      console.log(chalk.dim('  Recording stopped\n'));
+
+      if (transcript) {
+        console.log(chalk.dim(`  [heard: "${transcript}"]`));
+        finish(parseVoiceCommand(transcript));
+      } else {
+        // Stay in the loop so the user can retry without restarting the process
+        console.log(chalk.yellow('  No speech detected, press SPACE to try again'));
+      }
+    };
+
+    function onKeypress(str, key) {
+      if (!key) return;
+
+      if (key.ctrl && key.name === 'c') {
+        cleanup();
+        process.exit(0);
+      }
+
+      if (key.name === 'space') {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      }
     }
 
-    return new Promise((resolve, reject) => {
-      let isRecording = false;
-      let micInstance = null;
-      let timeoutId = null;
-      let finalResult = '';
-
-      const startRecording = () => {
-        if (isRecording) return;
-
-        isRecording = true;
-        console.log(chalk.green('  Listening...'));
-        playBeep(1000, 150); // High beep for start
-
-        micInstance = mic({
-          rate: sampleRate,
-          channels: 1,
-          debug: false,
-          exitOnSilence: 6
-        });
-
-        const micInputStream = micInstance.getAudioStream();
-
-        micInputStream.on('data', (data) => {
-          if (recognizer.acceptWaveform(data)) {
-            const result = JSON.parse(recognizer.result());
-            if (result.text) {
-              finalResult = result.text;
-            }
-          }
-        });
-
-        micInputStream.on('error', (err) => {
-          console.error(chalk.red(`  Microphone error: ${err.message}`));
-          cleanup();
-          reject(err);
-        });
-
-        micInstance.start();
-
-        // Safety timeout
-        timeoutId = setTimeout(() => {
-          console.log(chalk.yellow('  Timeout - stopping recording'));
-          stopRecording();
-        }, timeout);
-      };
-
-      const stopRecording = () => {
-        if (!isRecording) return;
-
-        isRecording = false;
-        clearTimeout(timeoutId);
-
-        if (micInstance) {
-          micInstance.stop();
-          micInstance = null;
-        }
-
-        // Get final result
-        const lastResult = JSON.parse(recognizer.finalResult());
-        if (lastResult.text) {
-          finalResult = lastResult.text;
-        }
-
-        playBeep(800, 100); // Lower beep for stop
-        console.log(chalk.dim('  Recording stopped\n'));
-
-        if (finalResult) {
-          const parsedArgs = parseVoiceCommand(finalResult);
-          cleanup();
-          resolve(parsedArgs);
-        } else {
-          console.log(chalk.yellow('  No speech detected, try again'));
-          // Don't exit, wait for another command
-        }
-      };
-
-      const cleanup = () => {
-        if (process.stdin.isTTY) {
-          process.stdin.setRawMode(false);
-        }
-        process.stdin.pause();
-        recognizer.free();
-        model.free();
-      };
-
-      // Handle key presses
-      process.stdin.on('keypress', (str, key) => {
-        if (key.ctrl && key.name === 'c') {
-          cleanup();
-          process.exit(0);
-        }
-
-        if (key.name === 'space') {
-          if (!isRecording) {
-            startRecording();
-          }
-        }
-      });
-
-      // Handle key releases
-      process.stdin.on('keypress', (str, key) => {
-        if (key.name === 'space' && isRecording) {
-          // Small delay to detect release
-          setTimeout(() => {
-            if (isRecording) {
-              stopRecording();
-            }
-          }, 50);
-        }
-      });
-    });
-
-  } catch (err) {
-    throw new Error(`Voice command failed: ${err.message}`);
-  }
+    process.stdin.on('keypress', onKeypress);
+  });
 }
 
 /**
@@ -301,8 +520,9 @@ export async function listenWithWhisper(options = {}) {
 
   await speak('Press space to record your command.');
 
+  const { default: readline } = await import('readline');
+
   return new Promise((resolve, reject) => {
-    const { default: readline } = require('readline');
     readline.emitKeypressEvents(process.stdin);
 
     if (process.stdin.isTTY) {

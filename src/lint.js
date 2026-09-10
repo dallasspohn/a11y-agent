@@ -11,7 +11,7 @@ program
   .name('a11y-lint')
   .description('Static HTML accessibility lint — no browser required')
   .requiredOption('--file <path>', 'Local HTML file to lint')
-  .option('--fix', 'Generate AI fix suggestions via Claude', false)
+  .option('--fix', 'Generate AI fix suggestions (local Ollama by default; see A11Y_AI_URL)', false)
   .option('--json', 'Output raw JSON results', false)
   .option('--fail-on <impact>', 'Exit 1 if violations at this impact or higher (critical|serious|moderate|minor)')
   .parse();

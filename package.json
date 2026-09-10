@@ -11,10 +11,18 @@
     "demo": "node src/scan.js --file samples/bad-page.html",
     "demo:lint": "node src/lint.js --file samples/bad-page.html",
     "demo:voice": "node src/scan.js --file samples/bad-page.html --voice",
+    "demo:listen": "node src/scan.js --listen",
+    "test:vosk": "node scripts/test-vosk-pipeline.js",
     "demo:watch": "node src/watch.js --dir samples/",
-    "conversation-demo": "node src/conversation-demo.js interactive",
-    "conversation-test": "node src/conversation-demo.js scripted",
-    "test": "node --test tests/lint-html.test.js && node src/lint.js --file samples/good-page.html --fail-on minor"
+    "conversation": "node src/scan.js --file samples/bad-page.html --fix --interactive",
+    "test": "node --test tests/*.test.js && node src/lint.js --file samples/good-page.html --fail-on minor",
+    "agent": "node src/agent.js",
+    "agent:text": "node src/agent.js --text",
+    "eval": "node evaluation/run-eval.js",
+    "eval:json": "node evaluation/run-eval.js --json",
+    "eval:check": "A11Y_EVAL=1 node --test tests/benchmark.test.js",
+    "demo:reset": "git checkout -- samples/bad-page.html samples/web-page.html && rm -f samples/*.bak && echo 'samples/bad-page.html and samples/web-page.html restored'",
+    "demo:agent": "npm run demo:reset --silent && node src/agent.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
@@ -30,5 +38,8 @@
   "optionalDependencies": {
     "mic": "^2.1.2",
     "vosk": "^0.3.39"
+  },
+  "bin": {
+    "a11y-agent": "./src/agent.js"
   }
 }

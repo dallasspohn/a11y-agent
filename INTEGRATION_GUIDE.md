@@ -45,7 +45,7 @@ In `src/scan.js`, add to the program options:
 program
   .option('--url <url>', 'URL to scan')
   .option('--file <path>', 'Local HTML file to scan')
-  .option('--fix', 'Generate AI fix suggestions via Claude', false)
+  .option('--fix', 'Generate AI fix suggestions (local Ollama by default; see A11Y_AI_URL)', false)
   .option('--json', 'Output raw JSON results', false)
   .option('--voice', 'Enable text-to-speech output', false)
   .option('--rate <speed>', 'Speech rate (words per minute, default 175)', '175')
