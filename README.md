@@ -124,6 +124,19 @@ npm run agent:text
 
 ### For Priya (Visual Workflow)
 
+**In the editor** — violations as squiggles while you type, no terminal:
+
+```bash
+cd vscode-extension && npm install && npm run build
+# then open vscode-extension/ in VS Code and press F5
+```
+
+See [vscode-extension/README.md](vscode-extension/README.md). It runs the
+static rules only — contrast and focus order need a rendered page, so those
+stay with `scan.js`.
+
+**In a terminal:**
+
 ```bash
 # Install dependencies
 npm install

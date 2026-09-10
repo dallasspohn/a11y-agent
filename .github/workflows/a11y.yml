@@ -32,6 +32,25 @@ jobs:
       - name: axe-core scan (accessible sample must pass)
         run: node src/scan.js --file samples/good-page.html --fail-on serious
 
+  extension:
+    name: VS Code extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Builds the bundle, then tests it. Catches the case where lint-html.js
+      # changes shape and the ESM-to-CJS bundling silently stops resolving.
+      - run: npm install
+        working-directory: vscode-extension
+
+      - run: npm test
+        working-directory: vscode-extension
+
   benchmark:
     name: Detection accuracy benchmark
     runs-on: ubuntu-latest
