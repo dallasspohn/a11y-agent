@@ -286,7 +286,7 @@ node src/scan.js --listen
 > paths like `samples/bad-page.html`. Use spoken aliases (*"scan bad page"*,
 > *"scan the good page"*) or a domain.
 
-See [VOICE_COMMANDS.md](VOICE_COMMANDS.md) for detailed setup. [anthony-integration/](anthony-integration/) sketches a GNOME voice desktop path but is **not installed or tested** — see Project Status.
+See [docs/voice.md](docs/voice.md) for detailed setup. [anthony-integration/](anthony-integration/) sketches a GNOME voice desktop path but is **not installed or tested** — see Project Status.
 
 ## How It Works
 
@@ -416,7 +416,8 @@ npm test              # 18 unit tests + a clean-page regression check
       as a design sketch, not a working path. **Do not demo it.**
 
 ### 🔄 Remaining Before Sept 15
-- [ ] Test the agent loop with a real microphone end to end
+- [x] Test the agent loop with a real microphone end to end
+- [ ] VS Code extension — live diagnostics on save (`spohnz/vscode-extension`)
 - [ ] Improve auto-fix quality on landmark/heading rules (see Known Issues)
 - [ ] Test on real Red Hat sites (redhat.com, PatternFly, console.redhat.com)
 - [ ] Record demo video (2-3 minutes, both personas)
@@ -451,11 +452,12 @@ TBD
 
 ## References
 
-- **Integrated Pipeline:** [INTEGRATED_PIPELINE.md](INTEGRATED_PIPELINE.md) — Full technical architecture
-- **Simplified Flow:** [PIPELINE_SIMPLIFIED.md](PIPELINE_SIMPLIFIED.md) — Executive summary
-- **Voice Commands:** [VOICE_COMMANDS.md](VOICE_COMMANDS.md) — STT/TTS setup and usage
-- **Voice Upgrade:** [VOICE_UPGRADE.md](VOICE_UPGRADE.md) — TTS engine comparison
-- **Anthony Integration:** [anthony-integration/README.md](anthony-integration/README.md) — GNOME voice desktop (design sketch, not wired up)
+- **Voice setup:** [docs/voice.md](docs/voice.md) — STT/TTS install, mic config, troubleshooting
+- **Anthony integration:** [anthony-integration/README.md](anthony-integration/README.md) — GNOME voice desktop (design sketch, not wired up)
+
+This README is the entry point. Everything else that used to live at the repo
+root described the pre-agent architecture and has been removed — `git log` has
+it if you need it.
 
 ## Team
 
