@@ -48,7 +48,15 @@ jobs:
       - run: npm install
         working-directory: vscode-extension
 
-      - run: npm test
+      - name: Unit tests (stubbed editor API)
+        run: npm test
+        working-directory: vscode-extension
+
+      # Downloads a real VS Code and activates the extension inside it. The
+      # unit tests stub the editor, so only this catches a broken manifest or
+      # an extension that fails to activate. Needs a display.
+      - name: Integration tests (real extension host)
+        run: xvfb-run -a npm run test:integration
         working-directory: vscode-extension
 
   benchmark:

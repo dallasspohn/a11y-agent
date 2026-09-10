@@ -6,14 +6,25 @@ never mind before review.
 
 ## Try it
 
+Open the **repo root** in VS Code and press **F5** — pick *Run A11Y Agent
+extension*. The build runs automatically; a second window opens with
+`samples/bad-page.html` and squiggles already on it.
+
+There is a second launch config in `vscode-extension/.vscode/` for when you
+have this folder open on its own.
+
+No editor, or F5 not cooperating:
+
 ```bash
-cd vscode-extension
-npm install
-npm run build
+cd vscode-extension && npm install && npm run build
+code --extensionDevelopmentPath="$PWD" --new-window ../samples/bad-page.html
 ```
 
-Then open this folder in VS Code and press **F5**. A second window opens with
-`samples/bad-page.html` loaded and squiggles already on it.
+To confirm it works without looking at anything:
+
+```bash
+npm run test:integration    # activates the extension in a real VS Code
+```
 
 ## What it reports
 
@@ -54,15 +65,22 @@ louder than a syntax error in the same file.
 ## Tests
 
 ```bash
-npm test
+npm test                 # 14 unit tests, stubbed editor  (~1s)
+npm run test:integration # 7 tests in a real VS Code       (~30s, needs a display)
+npm run test:all         # both
 ```
 
-14 tests, run against the **built bundle** rather than `src/`. That is
+The **unit** tests run against the built bundle rather than `src/`. That is
 deliberate: the interesting failure mode is the ESM-to-CJS conversion esbuild
 performs on `lint-html.js` (the scanner is ESM, the extension host wants CJS).
 Importing the source directly would test everything except the part most likely
-to break.
+to break. They cover range accuracy, malformed input, the impact filter, and
+the lifecycle handlers.
 
-They cover range accuracy, malformed input, the impact filter, and the
-lifecycle handlers — but they stub the editor API, so they prove the logic, not
-the integration. Press F5 before trusting a release.
+The **integration** tests download a real VS Code, install the extension into
+it, and assert on the actual Problems panel. They exist because the unit tests
+stub `vscode` entirely, so they cannot catch a bad manifest, a failed
+activation, or a launch config that never worked — all of which are invisible
+until someone presses F5.
+
+Both run in CI; the integration job wraps them in `xvfb-run`.

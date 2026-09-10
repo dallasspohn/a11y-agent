@@ -15,12 +15,16 @@ npm-debug.log*
 Thumbs.db
 
 # IDE
-.vscode/
-# ...except the extension's F5 config, which is shared tooling, not a personal
-# preference. Git will not descend into an excluded directory, so the parent
-# has to be un-excluded before the file can be.
+.vscode/*
+# ...except the F5 configs, which are shared tooling rather than personal
+# preference. Without them a fresh clone cannot launch the extension host.
+!.vscode/launch.json
+!.vscode/tasks.json
+# Git will not descend into an excluded directory, so the parent has to be
+# un-excluded before the files inside it can be.
 !vscode-extension/.vscode/
 !vscode-extension/.vscode/launch.json
+!vscode-extension/.vscode/tasks.json
 .idea/
 *.swp
 *.swo
@@ -28,6 +32,9 @@ Thumbs.db
 # Build output
 dist/
 build/
+
+# VS Code downloaded by the extension integration tests (~1GB)
+.vscode-test/
 
 # Test output
 coverage/

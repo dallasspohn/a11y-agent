@@ -66,11 +66,15 @@
     "build": "esbuild src/extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18",
     "watch": "npm run build -- --sourcemap --watch",
     "package": "npm run build -- --minify",
-    "test": "npm run build && node --test test/*.test.js"
+    "test": "npm run build && node --test test/*.test.js",
+    "test:integration": "npm run build && node test/integration/run.js",
+    "test:all": "npm test && npm run test:integration"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
-    "esbuild": "^0.25.0"
+    "@vscode/test-electron": "^3.1.0",
+    "esbuild": "^0.25.0",
+    "mocha": "^12.0.0"
   },
   "dependencies": {
     "node-html-parser": "^7.0.1"
