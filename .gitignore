@@ -16,6 +16,11 @@ Thumbs.db
 
 # IDE
 .vscode/
+# ...except the extension's F5 config, which is shared tooling, not a personal
+# preference. Git will not descend into an excluded directory, so the parent
+# has to be un-excluded before the file can be.
+!vscode-extension/.vscode/
+!vscode-extension/.vscode/launch.json
 .idea/
 *.swp
 *.swo
