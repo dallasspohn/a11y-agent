@@ -1,0 +1,21 @@
+title: A11Y Agent
+description: "Shift-Left Accessibility — catch WCAG violations while you code, not after you ship."
+remote_theme: just-the-docs/just-the-docs@v0.10.0
+
+url: https://dallasspohn.github.io
+baseurl: /a11y-agent
+
+color_scheme: light
+
+aux_links:
+  "View on GitHub":
+    - https://github.com/dallasspohn/a11y-agent
+
+footer_content: >-
+  Red Hat Innovation Days 2026 &mdash; Challenge 4: Accessibility in Software Development at Scale.
+  Built by Dallas Spohn &amp; Surya Pathak.
+
+nav_sort: order
+
+exclude:
+  - voice.md
