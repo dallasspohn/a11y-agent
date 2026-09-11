@@ -63,9 +63,9 @@
     }
   },
   "scripts": {
-    "build": "esbuild src/extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18",
-    "watch": "npm run build -- --sourcemap --watch",
-    "package": "npm run build -- --minify",
+    "build": "node build.js",
+    "watch": "node build.js --sourcemap --watch",
+    "package": "node build.js --minify",
     "test": "npm run build && node --test test/*.test.js",
     "test:integration": "npm run build && node test/integration/run.js",
     "test:all": "npm test && npm run test:integration"
