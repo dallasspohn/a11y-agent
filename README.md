@@ -223,7 +223,7 @@ See [evaluation/README.md](evaluation/README.md) for details.
 npm run demo          # scan and print
 npm run demo:lint     # static lint only, no browser
 npm run demo:agent    # reset fixture + full voice loop
-npm test              # 18 unit tests + a clean-page regression check
+npm test              # 26 unit tests + a clean-page regression check
 ```
 
 > ⚠️ **`npm run demo:reset` before every rehearsal.** Auto-apply edits the real
