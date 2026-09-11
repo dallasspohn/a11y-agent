@@ -92,6 +92,10 @@ const TARGET_ALIASES = {
   'the good page': 'samples/good-page.html',
   'web page': 'samples/web-page.html',
   'the web page': 'samples/web-page.html',
+  'current page': 'samples/web-page.html',
+  'the current page': 'samples/web-page.html',
+  'current web page': 'samples/web-page.html',
+  'the current web page': 'samples/web-page.html',
 };
 
 // The small Vosk model rarely returns an alias verbatim — "bad page" comes back
@@ -101,7 +105,7 @@ const TARGET_ALIASES = {
 const FUZZY_ALIASES = [
   { match: /\b(bad|bat|bed|bab)\b/, path: 'samples/bad-page.html' },
   { match: /\bgood\b/, path: 'samples/good-page.html' },
-  { match: /\b(web|webb|wed|whip)\b/, path: 'samples/web-page.html' },
+  { match: /\b(web|webb|wed|whip|current)\b/, path: 'samples/web-page.html' },
 ];
 
 const KNOWN_TLDS = new Set([
@@ -135,6 +139,13 @@ export function normalizeSpokenTarget(raw) {
   if (!/\b(dot|slash|backslash)\b/.test(spoken)) {
     const fuzzy = FUZZY_ALIASES.find((a) => a.match.test(spoken));
     if (fuzzy) return fuzzy.path;
+
+    // Nothing claimed this phrase and it isn't dictating a path, so it is
+    // ordinary speech. Joining the words would invent a filename — "current
+    // page" became "currentpage", which the agent then read back as
+    // "I could not find a file called currentpage", blaming the user for a
+    // name they never said. Hand the words back unchanged instead.
+    return spoken;
   }
 
   // Spoken targets have no real word breaks — join tokens, mapping symbol words
