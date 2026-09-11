@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A11Y Agent — Shift Left A11y</title>
+  <style>
+    :root {
+      --red: #ee0000;
+      --red-dark: #a50000;
+      --bg: #ffffff;
+      --bg-alt: #f6f6f6;
+      --bg-priya: #fff4e1;
+      --bg-james: #e1f5ff;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --border: #ddd;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --radius: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+    }
+    .hero h1 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800; }
+    .hero h1 span { color: var(--red); }
+    .hero .subtitle {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      padding: 0.4rem 1.2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Container */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Sections */
+    section {
+      padding: 4rem 0;
+    }
+    section:nth-child(even) {
+      background: var(--bg-alt);
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+    h3 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    p { margin-bottom: 1rem; }
+
+    /* Persona Cards */
+    .personas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .persona-card {
+      border-radius: var(--radius);
+      padding: 2rem;
+      border: 2px solid transparent;
+    }
+    .persona-card.priya {
+      background: var(--bg-priya);
+      border-color: #f5a623;
+    }
+    .persona-card.james {
+      background: var(--bg-james);
+      border-color: #2196f3;
+    }
+    .persona-card h3 { margin-bottom: 0.5rem; }
+    .persona-card .need { font-weight: 600; margin-bottom: 0.5rem; }
+    .persona-card .solution { color: var(--text-muted); }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .feature {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .feature .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .feature h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .feature p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    p code, li code {
+      background: var(--bg-alt);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      border: 1px solid var(--border);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th {
+      background: var(--bg-alt);
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border);
+    }
+    td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:hover td { background: var(--bg-alt); }
+
+    /* Demo Output */
+    .demo-output {
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+    .demo-output .prompt { color: #79c0ff; }
+    .demo-output .header { color: #f0883e; font-weight: 700; }
+    .demo-output .success { color: #3fb950; }
+    .demo-output .critical { color: #f85149; }
+    .demo-output .serious { color: #d29922; }
+    .demo-output .file { color: #a5d6ff; }
+
+    /* Check list */
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+    .checklist li {
+      padding: 0.5rem 0;
+      padding-left: 2rem;
+      position: relative;
+    }
+    .checklist li::before {
+      position: absolute;
+      left: 0;
+      font-size: 1.1rem;
+    }
+    .checklist li.done::before { content: "\2705"; }
+    .checklist li.pending::before { content: "\u25FB"; }
+    .checklist li.in-progress::before { content: "\u23F3"; }
+
+    /* Quote */
+    blockquote {
+      border-left: 4px solid var(--red);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      background: #fef2f2;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-style: italic;
+      color: #333;
+    }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: white;
+    }
+    .cta h2 { color: white; }
+    .cta .commands {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .cta .cmd {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      font-family: monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .cta .cmd:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Selection Grammar Table */
+    .grammar-table td:first-child {
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--red-dark);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Architecture Flow */
+    .arch-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .arch-step {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      position: relative;
+    }
+    .arch-step .num {
+      width: 2rem;
+      height: 2rem;
+      background: var(--red);
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    .arch-step h4 { margin-bottom: 0.25rem; }
+    .arch-step p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+    .arch-step::after {
+      content: "\2192";
+      position: absolute;
+      right: -0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+      color: var(--text-muted);
+    }
+    .arch-step:last-child::after { content: none; }
+
+    /* Status Section */
+    .status-section { margin-bottom: 2rem; }
+    .status-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .personas { grid-template-columns: 1fr; }
+      .arch-flow { grid-template-columns: 1fr 1fr; }
+      .arch-step::after { content: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <h1><span>A11Y</span> Agent</h1>
+  <p class="subtitle">AI-Powered Accessibility Testing with Voice I/O for Red Hat Innovation Days 2026</p>
+  <span class="badge">Shift Left A11y</span>
+</header>
+
+<main>
+
+<!-- Personas -->
+<section>
+  <div class="container">
+    <h2>Two Personas, One Tool</h2>
+    <div class="personas">
+      <div class="persona-card priya">
+        <h3>Priya (Engineer)</h3>
+        <p class="need">Need: Real-time feedback while writing HTML to meet accessibility standards</p>
+        <p class="solution">Solution: File watcher &rarr; instant linting &rarr; AI fix suggestions &rarr; pre-commit gates &rarr; CI/CD enforcement</p>
+      </div>
+      <div class="persona-card james">
+        <h3>James (Visually Impaired Developer)</h3>
+        <p class="need">Need: Accessible testing tools with voice I/O to verify product interfaces</p>
+        <p class="solution">Solution: Voice commands &rarr; spoken violations &rarr; cherry-picked fixes &rarr; verified re-scan</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section>
+  <div class="container">
+    <h2>Features</h2>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="icon">&#x1F50D;</div>
+        <h3>Automated Detection</h3>
+        <p>Industry-standard WCAG 2.0/2.1 A/AA violation detection via axe-core</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F916;</div>
+        <h3>AI-Powered Fixes</h3>
+        <p>Context-aware, copy-pasteable code fixes using local or cloud models</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F3AF;</div>
+        <h3>Cherry-Picked Auto-Fix</h3>
+        <p><em>"fix all critical"</em> / <em>"fix issue one and three"</em> &rarr; validated edits written to disk</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x2705;</div>
+        <h3>Verified Results</h3>
+        <p>Every applied fix is proven by a re-scan, not asserted</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F4DA;</div>
+        <h3>Developer Education</h3>
+        <p>Explanations of WHY violations matter and their impact on users with disabilities</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F3A4;</div>
+        <h3>Voice I/O</h3>
+        <p>Neural TTS output and offline STT input for visually impaired developers</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F441;&#xFE0F;</div>
+        <h3>Real-time Feedback</h3>
+        <p>File watcher auto-lints on save with instant visual feedback</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F6AB;</div>
+        <h3>Git Integration</h3>
+        <p>Pre-commit hooks and CI/CD gates prevent regressions</p>
+      </div>
+      <div class="feature">
+        <div class="icon">&#x1F999;</div>
+        <h3>Local Models</h3>
+        <p>Ollama by default &mdash; no API key, no token cost</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section>
+  <div class="container">
+    <h2>Quick Start</h2>
+
+    <h3>For James (Voice Workflow)</h3>
+    <pre><code># One-time voice setup
+./setup-voice.sh          # Downloads Vosk model (~50MB)
+
+# The full loop &mdash; resets the demo fixture, then starts listening
+npm run demo:agent
+
+# Same flow over the keyboard (no microphone needed)
+npm run agent:text</code></pre>
+
+    <div class="demo-output">
+      <div class="header">  A11Y AGENT</div>
+      <div>  Agent at the ready.</div>
+      <br>
+      <div>  What should I scan? <span class="prompt">&gt; scan bad page</span></div>
+      <br>
+      <div class="header">  ISSUES FOUND</div>
+      <div>  [<span class="critical">1</span>]  critical  Images must have alternative text          <span class="serious">(image-alt, 2 elements)</span></div>
+      <div>  [<span class="critical">2</span>]  critical  Select element must have an accessible name <span class="serious">(select-name, 1 element)</span></div>
+      <div>  [<span class="serious">3</span>]  serious   Elements must meet minimum color contrast   <span class="serious">(color-contrast, 1 element)</span></div>
+      <br>
+      <div>  What should I fix? <span class="prompt">&gt; fix issue one</span></div>
+      <br>
+      <div>  [1] image-alt</div>
+      <div>      why:  Images without alt text can't be described by screen readers.</div>
+      <div>      wcag: 1.1.1 Non-text Content</div>
+      <div>      - &lt;img src="logo.png"&gt;</div>
+      <div>      + &lt;img src="logo.png" <span class="success">alt="Company Logo"</span>&gt;</div>
+      <br>
+      <div>  Apply them? <span class="prompt">&gt; yes</span></div>
+      <br>
+      <div class="success">  Applied 2 edits to samples/bad-page.html</div>
+      <div>  Backup: samples/bad-page.html.bak</div>
+      <br>
+      <div>  Re-scanning to verify...</div>
+      <div class="success">  1 of 1 selected issue resolved. 1 more issue resolved as a knock-on</div>
+      <div class="success">  effect. 7 violations remain.</div>
+    </div>
+
+    <h4>Selection Grammar</h4>
+    <table class="grammar-table">
+      <thead>
+        <tr><th>Say</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>fix all critical</td><td>every critical violation</td></tr>
+        <tr><td>fix critical and serious</td><td>two severity bands</td></tr>
+        <tr><td>fix issue one and three</td><td>specific issues</td></tr>
+        <tr><td>fix issues one through four</td><td>a range</td></tr>
+        <tr><td>fix the first three</td><td>first N in the list</td></tr>
+        <tr><td>fix everything</td><td>all of them</td></tr>
+        <tr><td>done / quit / stop</td><td>exit the loop</td></tr>
+      </tbody>
+    </table>
+
+    <h3>For Priya (Visual Workflow)</h3>
+    <p><strong>In the editor</strong> &mdash; Open this repo in VS Code and press <strong>F5</strong>, then pick <em>Run A11Y Agent extension</em>.</p>
+    <p><strong>In a terminal:</strong></p>
+    <pre><code># Install dependencies
+npm install
+
+# Start the file watcher (auto-lint on save)
+node src/watch.js --dir samples/
+
+# Get AI fix suggestions (uses Ollama by default, free &amp; local)
+node src/lint.js --file samples/bad-page.html --fix
+
+# Install pre-commit hook (blocks bad commits)
+npm run install-hooks</code></pre>
+
+    <h3>Universal Commands</h3>
+    <pre><code># Scan a local HTML file
+node src/scan.js --file samples/bad-page.html
+
+# Scan a live URL
+node src/scan.js --url https://example.com
+
+# Get AI fix suggestions
+node src/scan.js --file samples/bad-page.html --fix
+
+# JSON output (for CI/CD)
+node src/scan.js --url https://example.com --json &gt; report.json
+
+# Use a different AI model
+A11Y_AI_MODEL=llama3.1:70b node src/scan.js --file samples/bad-page.html --fix</code></pre>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section>
+  <div class="container">
+    <h2>How It Works</h2>
+
+    <h3>Detection Pipeline (Deterministic)</h3>
+    <div class="arch-flow">
+      <div class="arch-step">
+        <div class="num">1</div>
+        <h4>Static Lint</h4>
+        <p>Parses HTML, checks missing alt text, invalid ARIA, heading order &mdash; ~100ms</p>
+      </div>
+      <div class="arch-step">
+        <div class="num">2</div>
+        <h4>Browser Scan</h4>
+        <p>Playwright + axe-core checks computed styles, contrast, focus order &mdash; ~2-5s</p>
+      </div>
+      <div class="arch-step">
+        <div class="num">3</div>
+        <h4>AI Explains</h4>
+        <p>Generates WHY it matters, the before/after edit, and WCAG criterion</p>
+      </div>
+      <div class="arch-step">
+        <div class="num">4</div>
+        <h4>Validate &amp; Apply</h4>
+        <p>Edits verified against real source, .bak backup, re-scan confirms</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2.5rem;">Key Design Decisions</h3>
+    <p><strong>Detection is deterministic, AI only explains.</strong> Violations are found by lint.js and axe-core &mdash; AI is only used for fix suggestions and explanations, never detection.</p>
+    <p><strong>Applied fixes are validated, not trusted.</strong> <code>generateFixPlan()</code> asks the model for one structured JSON edit per violation. Edits whose <code>before</code> strings aren't found exactly are marked <em>manual</em>. Every write makes a <code>.bak</code> and is followed by a verification re-scan.</p>
+
+    <h3 style="margin-top: 2.5rem;">Voice Layer (Accessibility for the Tool Itself)</h3>
+    <p><strong>Input:</strong> Vosk STT, toggled with SPACE, fully offline<br>
+    <strong>Parsing:</strong> Natural language &rarr; CLI flags, or &rarr; violation indices for fix selection<br>
+    <strong>Output:</strong> edge-tts neural voice (espeak fallback) reads violations, fixes, and summaries<br>
+    <strong>Loop:</strong> Selection &rarr; fixes &rarr; apply &rarr; verify &rarr; renumbered list &rarr; repeat</p>
+
+    <h3 style="margin-top: 2.5rem;">Automation Layer (Shift Left)</h3>
+    <p><strong>watch.js</strong> monitors file changes, auto-runs lint on save.<br>
+    <strong>Pre-commit hook</strong> blocks git commits if serious violations found.<br>
+    <strong>GitHub Actions</strong> runs scan on every PR, blocks merge if violations exceed threshold.</p>
+  </div>
+</section>
+
+<!-- Configuration -->
+<section>
+  <div class="container">
+    <h2>Configuration</h2>
+
+    <h3>AI Provider</h3>
+    <p>The CLI talks to <strong>any OpenAI-compatible endpoint</strong> and defaults to a local Ollama. No API key required.</p>
+    <table>
+      <thead>
+        <tr><th>Variable</th><th>Default</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>A11Y_AI_URL</code></td><td><code>http://localhost:11434/v1</code></td><td>Endpoint</td></tr>
+        <tr><td><code>A11Y_AI_MODEL</code></td><td><code>llama3.1</code></td><td>Model name</td></tr>
+        <tr><td><code>A11Y_AI_KEY</code></td><td><code>ollama</code></td><td>API key, if needed</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Voice</h3>
+    <table>
+      <thead>
+        <tr><th>Variable</th><th>Default</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>A11Y_VOICE_ENGINE</code></td><td><code>edge</code></td><td><code>edge</code> (neural) &middot; <code>piper</code> &middot; <code>espeak</code> (offline)</td></tr>
+        <tr><td><code>A11Y_VOICE_NAME</code></td><td><code>en-US-GuyNeural</code></td><td>edge-tts voice</td></tr>
+        <tr><td><code>A11Y_VOICE_RATE</code></td><td><code>175</code></td><td>Words per minute</td></tr>
+        <tr><td><code>A11Y_NO_BEEP</code></td><td><em>unset</em></td><td>Set to <code>1</code> to silence tones</td></tr>
+        <tr><td><code>A11Y_MIC_DEVICE</code></td><td><code>default</code></td><td>ALSA capture device for STT</td></tr>
+        <tr><td><code>A11Y_EDGE_TIMEOUT_MS</code></td><td><code>10000</code></td><td>Fallback to espeak after this</td></tr>
+        <tr><td><code>VOSK_MODEL_PATH</code></td><td><em>auto-detected</em></td><td>Override STT model directory</td></tr>
+      </tbody>
+    </table>
+    <p>If edge-tts or the network is unavailable, speech <strong>falls back to espeak-ng automatically</strong> rather than going silent.</p>
+  </div>
+</section>
+
+<!-- Test Data -->
+<section>
+  <div class="container">
+    <h2>Test It Out</h2>
+    <p><code>samples/bad-page.html</code> produces exactly <strong>9 axe violations</strong> &mdash; 2 critical, 3 serious, 4 moderate:</p>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Impact</th><th>Rule</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><span style="color: #d32f2f; font-weight: 600;">critical</span></td><td><code>image-alt</code> &mdash; images without alternative text (2 elements)</td></tr>
+        <tr><td>2</td><td><span style="color: #d32f2f; font-weight: 600;">critical</span></td><td><code>select-name</code> &mdash; select with no accessible name</td></tr>
+        <tr><td>3</td><td><span style="color: #b45309; font-weight: 600;">serious</span></td><td><code>color-contrast</code> &mdash; text below the contrast threshold</td></tr>
+        <tr><td>4</td><td><span style="color: #b45309; font-weight: 600;">serious</span></td><td><code>html-has-lang</code> &mdash; missing <code>lang</code> attribute</td></tr>
+        <tr><td>5</td><td><span style="color: #b45309; font-weight: 600;">serious</span></td><td><code>link-name</code> &mdash; icon-only link with no discernible text</td></tr>
+        <tr><td>6</td><td><span style="color: #856404; font-weight: 600;">moderate</span></td><td><code>heading-order</code> &mdash; skipped heading levels</td></tr>
+        <tr><td>7</td><td><span style="color: #856404; font-weight: 600;">moderate</span></td><td><code>landmark-one-main</code> &mdash; no main landmark</td></tr>
+        <tr><td>8</td><td><span style="color: #856404; font-weight: 600;">moderate</span></td><td><code>page-has-heading-one</code> &mdash; no <code>&lt;h1&gt;</code></td></tr>
+        <tr><td>9</td><td><span style="color: #856404; font-weight: 600;">moderate</span></td><td><code>region</code> &mdash; content outside landmarks (10 elements)</td></tr>
+      </tbody>
+    </table>
+    <pre><code>npm run demo          # scan and print
+npm run demo:lint     # static lint only, no browser
+npm run demo:agent    # reset fixture + full voice loop
+npm test              # 18 unit tests + a clean-page regression check</code></pre>
+    <blockquote>
+      <strong>Warning:</strong> Run <code>npm run demo:reset</code> before every rehearsal. Auto-apply edits modify the real <code>samples/bad-page.html</code>.
+    </blockquote>
+  </div>
+</section>
+
+<!-- James Persona Story -->
+<section>
+  <div class="container">
+    <h2>The James Persona Story</h2>
+    <p><strong>James</strong> is a visually impaired developer at Red Hat. When he needs to test accessibility of a product interface, he currently needs a sighted colleague to open dev tools, run axe DevTools, read violations aloud, Google fixes, and describe the code.</p>
+    <h3>With A11Y Agent + Voice:</h3>
+    <ol>
+      <li>James runs <code>a11y-agent</code> and hears <em>"Agent at the ready"</em></li>
+      <li>He says <em>"scan bad page"</em> &mdash; the tool speaks the summary and reads a numbered list</li>
+      <li>He says <em>"fix all critical"</em> &mdash; the tool generates and reads the fixes</li>
+      <li>He says <em>"yes"</em> &mdash; the file is patched, with a backup</li>
+      <li>The tool re-scans and confirms: <em>"1 of 1 selected issue resolved. 7 violations remain."</em></li>
+    </ol>
+    <blockquote>"We built an accessibility testing tool... and then made it accessible. Because if James can't use our accessibility checker, what's the point?"</blockquote>
+  </div>
+</section>
+
+<!-- Project Status -->
+<section>
+  <div class="container">
+    <h2>Project Status</h2>
+    <p><strong>Status:</strong> Demo Prep &mdash; both persona pipelines merged into <code>main</code></p>
+
+    <div class="status-section">
+      <h3>Completed &mdash; Voice / James</h3>
+      <ul class="checklist">
+        <li class="done">Voice commands (Vosk STT) &mdash; <code>--listen</code> flag</li>
+        <li class="done">Text-to-speech output &mdash; <code>--voice</code> flag, edge-tts neural with espeak fallback</li>
+        <li class="done">Interactive conversational mode &mdash; <code>--interactive</code> flag</li>
+        <li class="done">Natural language parsing for voice commands</li>
+        <li class="done">Voice triage loop with cherry-picked auto-fix &mdash; <code>npm run agent</code></li>
+        <li class="done">Fix validation &mdash; re-scan after applying, reports knock-on fixes</li>
+      </ul>
+    </div>
+
+    <div class="status-section">
+      <h3>Completed &mdash; Pipeline / Priya</h3>
+      <ul class="checklist">
+        <li class="done">File watcher (watch.js) &mdash; Auto-lint on save</li>
+        <li class="done">Static HTML linter (lint.js) &mdash; No browser needed</li>
+        <li class="done">Model-agnostic AI fixes &mdash; Ollama/OpenAI/Groq support</li>
+        <li class="done">Pre-commit hook &mdash; Blocks bad commits</li>
+        <li class="done">GitHub Actions CI/CD &mdash; PR checks</li>
+        <li class="done">Good/bad sample pages for testing</li>
+      </ul>
+    </div>
+
+    <div class="status-section">
+      <h3>Written But Not Wired Up</h3>
+      <ul class="checklist">
+        <li class="pending">Anthony integration &mdash; design sketch, not a working path. Do not demo.</li>
+      </ul>
+    </div>
+
+    <div class="status-section">
+      <h3>Remaining Before Sept 15</h3>
+      <ul class="checklist">
+        <li class="done">Test agent loop with a real microphone end to end</li>
+        <li class="pending">VS Code extension &mdash; live diagnostics on save</li>
+        <li class="pending">Improve auto-fix quality on landmark/heading rules</li>
+        <li class="pending">Test on real Red Hat sites (redhat.com, PatternFly, console.redhat.com)</li>
+        <li class="pending">Record demo video (2-3 minutes, both personas)</li>
+        <li class="pending">Create architecture diagram</li>
+        <li class="pending">Draft impact statement</li>
+        <li class="pending">Collect benchmark datasets (20-30 good/bad examples)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Known Issues -->
+<section>
+  <div class="container">
+    <h2>Known Issues</h2>
+    <ul>
+      <li><strong>Auto-fix quality varies by rule.</strong> <code>image-alt</code> and <code>html-has-lang</code> are reliable. Structural rules can produce edits on local <code>llama3.1</code> that introduce new violations. Review the diff before accepting.</li>
+      <li><strong>Fix generation is slow locally</strong> &mdash; roughly 30s per violation on <code>llama3.1</code>. Select one or two issues during a live demo.</li>
+      <li><strong><code>select-name</code> reliably produces no automatic edit</strong> &mdash; the tool reports it as needing a human, which is correct behavior.</li>
+      <li><strong>Auto-apply only works on local files</strong>, not URLs.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Dependencies -->
+<section>
+  <div class="container">
+    <h2>Dependencies</h2>
+
+    <h3>Detection (Core)</h3>
+    <ul>
+      <li><code>playwright</code> &mdash; Headless browser automation</li>
+      <li><code>@axe-core/playwright</code> &mdash; WCAG 2.0/2.1 testing engine</li>
+      <li><code>commander</code> &mdash; CLI argument parsing</li>
+      <li><code>chalk</code> &mdash; Terminal color output</li>
+    </ul>
+
+    <h3>AI Fixes (Model-Agnostic)</h3>
+    <ul>
+      <li><code>openai</code> &mdash; OpenAI-compatible client (Ollama, OpenAI, Groq, vLLM)</li>
+      <li><code>@anthropic-ai/sdk</code> &mdash; Claude, used only by the Anthony MCP server</li>
+    </ul>
+
+    <h3>Voice I/O (Optional)</h3>
+    <ul>
+      <li><code>edge-tts</code> &mdash; Neural text-to-speech</li>
+      <li><code>espeak-ng</code> &mdash; Offline TTS fallback</li>
+      <li><code>vosk</code> &mdash; Offline speech-to-text</li>
+      <li><code>mic</code> + <code>arecord</code> &mdash; Microphone audio capture</li>
+    </ul>
+
+    <h3>Automation Pipeline</h3>
+    <ul>
+      <li><code>chokidar</code> &mdash; File watching</li>
+      <li>Git hooks &mdash; Pre-commit validation</li>
+      <li>GitHub Actions &mdash; CI/CD gates</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Innovation Days -->
+<section>
+  <div class="container">
+    <h2>Innovation Days Challenge</h2>
+    <p><strong>Challenge 4:</strong> "How might we ensure associates can build accessible experiences <strong>from the start</strong>, so users can fully engage with Red Hat products without barriers?"</p>
+    <p><strong>Team:</strong> Shift Left A11y &mdash; Dallas Spohn, Surya Pathak<br>
+    <strong>Deadline:</strong> September 15, 2026</p>
+
+    <h3>The Problem</h3>
+    <ul>
+      <li>Accessibility checked too late (after code ships)</li>
+      <li>Developers lack real-time guidance</li>
+      <li>Tools themselves aren't accessible (irony: blind developers can't use accessibility checkers)</li>
+      <li>Standards inconsistently applied</li>
+    </ul>
+
+    <h3>Our Solution</h3>
+    <p>Two workflows, one tool:</p>
+    <ol>
+      <li><strong>Shift left</strong> &mdash; Catch violations while code is written (watch.js, pre-commit, CI/CD)</li>
+      <li><strong>Shift accessible</strong> &mdash; Voice I/O so visually impaired developers can self-serve</li>
+    </ol>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Get Started</h2>
+  <div class="commands">
+    <div class="cmd">npm install</div>
+    <div class="cmd">npm run demo:agent</div>
+    <div class="cmd">node src/scan.js --file samples/bad-page.html</div>
+  </div>
+</div>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>Shift Left A11y &mdash; Dallas Spohn, Surya Pathak<br>
+  Red Hat Innovation Days 2026 Global AI Challenge &mdash; Challenge 4: Accessibility in Software Development at Scale</p>
+</footer>
+
+</body>
+</html>
