@@ -264,6 +264,13 @@ npm test              # 18 unit tests + a clean-page regression check
 - **Fix generation is slow locally** — ~30s per violation on `llama3.1`. Select one or two issues during a live demo.
 - **Auto-apply only works on local files**, not URLs.
 
+## License
+
+[Apache License 2.0](LICENSE) — Copyright 2026 Red Hat, Inc.
+
+Third-party content redistributed here is listed in [NOTICE](NOTICE); the one
+item is the W3C WAI Before/After Demonstration under `evaluation/pages/w3c-bad/`.
+
 ## References
 
 - [docs/voice.md](docs/voice.md) — Voice setup, mic config, troubleshooting

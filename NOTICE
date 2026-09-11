@@ -1,0 +1,39 @@
+A11Y Agent
+Copyright 2026 Red Hat, Inc.
+
+This product includes software developed at Red Hat, Inc. for the
+Red Hat Innovation Days 2026 Global AI Challenge (Challenge 4).
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+================================================================================
+Third-party content redistributed in this repository
+================================================================================
+
+evaluation/pages/w3c-bad/
+--------------------------------------------------------------------------------
+Copies of the W3C WAI "Before and After Demonstration" (BAD), used unmodified
+as an external gold-standard dataset for measuring detection accuracy. We did
+not author these pages; that is the point of including them, since a benchmark
+built only from our own fixtures would measure our assumptions rather than our
+coverage.
+
+    Source:    https://www.w3.org/WAI/demos/bad/
+    Copyright: (c) World Wide Web Consortium
+    Terms:     https://www.w3.org/Consortium/Legal/copyright-documents
+               https://www.w3.org/Consortium/Legal/ipr-notice#Copyright
+
+See evaluation/README.md for how these pages are scored.
+
+docs/ (published site)
+--------------------------------------------------------------------------------
+Built with the Just the Docs Jekyll theme, consumed as a remote theme and not
+vendored into this repository.
+
+    Source:  https://github.com/just-the-docs/just-the-docs
+    License: MIT
+
+docs/_sass/custom/custom.scss overrides colours from the theme's bundled
+OneLightJekyll syntax scheme to meet WCAG 2.1 AA contrast. The overridden
+values are derived from the theme's own palette; see that file for the
+measured ratios.

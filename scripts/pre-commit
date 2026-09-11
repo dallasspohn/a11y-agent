@@ -6,6 +6,15 @@ files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.html$')
 
 status=0
 for file in $files; do
+  # Page-level rules (html-has-lang, document-title) only make sense on a whole
+  # document. Jekyll partials under _includes/ and _layouts/ are fragments that
+  # get composed into a page later, so linting them standalone reports two
+  # serious violations that are not real and cannot be fixed in the fragment.
+  # Announced rather than silent, so a real page missing <html> is still visible.
+  if ! grep -qi '<html' "$file"; then
+    echo "  Skipping $file — HTML fragment, not a full document."
+    continue
+  fi
   node src/lint.js --file "$file" --fail-on serious || status=1
 done
 
