@@ -1,0 +1,22 @@
+{%- comment -%}
+  Overrides the theme's sidebar footer.
+
+  just-the-docs ships it as <footer class="site-footer">, and the page already
+  has a real <footer> at the bottom carrying footer_content from _config.yml.
+  Two <footer> elements outside any sectioning content are two contentinfo
+  landmarks, which axe flags as landmark-no-duplicate-contentinfo and
+  landmark-unique. Our own scanner found both on our own docs site.
+
+  This line is theme attribution, not page metadata, so the real contentinfo
+  should be the one at the bottom. A plain <div> fixes the duplicate but then
+  trips `region` instead — the credit ends up in no landmark at all. <aside>
+  makes it a complementary landmark: allowed alongside contentinfo, unique on
+  the page, and top-level because .side-bar is a plain div. Verified at 0
+  violations against the built page.
+
+  The theme only uses this file when it renders non-empty — see
+  _includes/components/sidebar.html upstream.
+{%- endcomment -%}
+<aside class="site-footer" aria-label="Theme credit">
+  This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+</aside>

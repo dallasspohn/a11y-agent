@@ -2,6 +2,7 @@
   "name": "a11y-agent",
   "version": "0.1.0",
   "description": "Shift-left accessibility agent with voice I/O — dual-persona pipeline for visual and visually impaired developers",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "lint": "node src/lint.js",

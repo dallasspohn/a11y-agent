@@ -1,0 +1,61 @@
+// Accessibility overrides for the just-the-docs remote theme.
+//
+// Everything here was found by pointing this project's own scanner at this
+// project's own docs site. Ratios are measured against the surface the text
+// actually sits on, and every value is quoted with the ratio it achieves.
+
+// ---------------------------------------------------------------------------
+// Sidebar footer
+// ---------------------------------------------------------------------------
+// The theme sets .site-footer to $grey-dk-000 (#959396) against the sidebar's
+// $grey-lt-000 (#f5f6fa) — 2.8:1, below the 4.5:1 AA threshold for body text.
+// $grey-dk-100 (#5c5962) is the theme's own $body-text-color and gives 6.4:1
+// on the same background, so this stays inside the theme's palette rather than
+// inventing a colour.
+.site-footer {
+  color: $grey-dk-100;
+}
+
+// ---------------------------------------------------------------------------
+// Syntax highlighting
+// ---------------------------------------------------------------------------
+// The bundled OneLightJekyll scheme fails AA for ten of its thirteen colour
+// groups against the #f5f6fa code background — comments at 2.41:1, strings at
+// 3.00:1, builtins at 3.19:1. On docs/tutorial.md, a page that is mostly shell
+// blocks, that is most of the page.
+//
+// Each replacement below keeps the original hue and saturation and only walks
+// lightness down until it clears 5:1, so One Light still looks like One Light.
+// Comments and strings stay visually distinct from each other and from body
+// text; comments remain italic, so the distinction never rests on colour alone.
+.highlight {
+  // comments: #9fa0a6 -> 5.1:1
+  .c, .c1, .cd, .cm, .cp, .cpf, .cs { color: #67686f; }
+
+  // strings: #50a04f -> 5.1:1
+  .l, .ld, .s, .s1, .s2, .sb, .sc, .sd, .se, .sh, .si, .sx { color: #3b763a; }
+
+  // builtins, classes, constants: #ca7601 -> 5.1:1
+  .bp, .nb, .nc, .nd, .ne, .ni, .nl, .no, .nv, .py, .vc, .vg { color: #9a5a01; }
+
+  // tags, instance vars: #e35549 -> 5.1:1
+  .nt, .vi { color: #c82c1f; }
+
+  // numbers, attribute names: #b66a00 -> 5.0:1
+  .il, .m, .mf, .mh, .mi, .mo, .na { color: #9b5a00; }
+
+  // regex, symbols: #0083bb -> 5.0:1
+  .sr, .ss { color: #0071a1; }
+
+  // diff markers: #e05151 / #43d089 -> 5.0:1 / 5.1:1
+  .gd { color: #cd2424; }
+  .gi { color: #1e774a; }
+
+  // Lexer-error tokens are white on #e05151, which is 3.8:1. Darkening the
+  // background to #c62828 puts white text at 5.6:1 and keeps the token red.
+  .err { background-color: #c62828; }
+
+  // .w (whitespace) is left alone deliberately — it styles characters that
+  // render no glyphs, so its 1.01:1 is unreachable by a reader and axe does
+  // not flag it.
+}

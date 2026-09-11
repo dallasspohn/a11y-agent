@@ -1,0 +1,33 @@
+<script>
+  // Keyboard access for code blocks that scroll sideways.
+  //
+  // Long shell commands overflow their container, which becomes a horizontal
+  // scroller. A mouse user drags it; a keyboard user cannot reach the hidden
+  // text at all unless the container itself is focusable. axe flags this as
+  // scrollable-region-focusable (serious), and our own scanner found it on
+  // docs/tutorial.md — a page made almost entirely of code blocks.
+  //
+  // Only blocks that actually overflow get a tab stop. Making every code block
+  // focusable would satisfy the rule too, but it would add dozens of dead tab
+  // stops to a tutorial, which is a worse experience than the bug.
+  //
+  // Re-checked on resize and after webfonts settle, since whether a block
+  // overflows depends on both.
+  (function () {
+    function markScrollable() {
+      document.querySelectorAll('.highlight').forEach(function (el) {
+        if (el.scrollWidth > el.clientWidth) {
+          el.setAttribute('tabindex', '0');
+        } else if (el.getAttribute('tabindex') === '0') {
+          el.removeAttribute('tabindex');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', markScrollable);
+    window.addEventListener('resize', markScrollable);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(markScrollable);
+    }
+  })();
+</script>
