@@ -57,35 +57,45 @@ He can't read a terminal. He needs to **hear** violations and **speak** commands
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    subgraph detect ["Detection (deterministic)"]
-        lint["lint.js — static HTML checks\n~100ms, no browser"]
-        scan["scan.js — axe-core in Chromium\ncontrast, ARIA, focus order"]
-    end
-
-    subgraph ai ["AI (suggestions only)"]
-        llm["Ollama / OpenAI / Groq\nmodel-agnostic, local by default"]
-    end
-
-    subgraph voice ["Voice I/O (accessibility)"]
-        stt["Vosk STT\noffline, privacy-first"]
-        tts["Edge TTS\nneural voice, espeak fallback"]
-    end
-
-    subgraph gates ["Shift-Left Gates"]
-        watch["watch.js — lint on save"]
-        hook["pre-commit hook"]
-        ci["GitHub Actions CI"]
-        vscode["VS Code extension\nlive squiggly diagnostics"]
-    end
-
-    detect --> ai
-    detect --> voice
-    detect --> gates
 ```
-
-**Key design principle:** Detection is deterministic (axe-core + static rules). AI only explains and suggests fixes — it never detects. Applied fixes are validated against the real source and verified by a re-scan.
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        A11Y AGENT PIPELINE                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   HTML / URL                                                            │
+│      │                                                                  │
+│      ▼                                                                  │
+│  ┌──────────────────── DETECTION (deterministic) ────────────────────┐  │
+│  │                                                                   │  │
+│  │  lint.js                        scan.js                           │  │
+│  │  ┌─────────────────┐           ┌──────────────────────┐          │  │
+│  │  │ Static HTML      │           │ axe-core in Chromium  │          │  │
+│  │  │ ~100ms           │           │ contrast, ARIA, focus │          │  │
+│  │  │ no browser       │           │ ~2-5s                 │          │  │
+│  │  └────────┬─────────┘           └──────────┬───────────┘          │  │
+│  │           └──────────────┬────────────────┘                       │  │
+│  └──────────────────────────┼────────────────────────────────────────┘  │
+│                             │                                           │
+│                             ▼                                           │
+│                      Violations List                                    │
+│                      (ranked by severity)                               │
+│                             │                                           │
+│              ┌──────────────┼──────────────┐                            │
+│              ▼              ▼              ▼                             │
+│                                                                         │
+│  ┌── PRIYA (visual) ──┐  ┌── JAMES (voice) ──┐  ┌── AI (suggestions)──┐│
+│  │                     │  │                    │  │                     ││
+│  │  watch.js on save   │  │  Vosk STT input    │  │  Ollama / OpenAI   ││
+│  │  pre-commit hook    │  │  Edge TTS output   │  │  local by default  ││
+│  │  GitHub Actions CI  │  │  agent.js loop     │  │  model-agnostic    ││
+│  │  VS Code squiggles  │  │  auto-fix + verify │  │  zero cost         ││
+│  │                     │  │                    │  │                     ││
+│  └─────────────────────┘  └────────────────────┘  └─────────────────────┘│
+│                                                                         │
+│  PRINCIPLE: Detection is deterministic. AI only suggests fixes.         │
+│  Applied fixes are validated against source and verified by re-scan.    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ## Features
 
