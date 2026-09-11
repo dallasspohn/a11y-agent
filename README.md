@@ -1,55 +1,91 @@
-# A11Y Agent — Shift Left A11y
+# A11Y Agent — Shift-Left Accessibility
 
-**AI-Powered Accessibility Testing for Red Hat Innovation Days 2026**
+**Red Hat Innovation Days 2026 — Challenge 4: Accessibility in Software Development at Scale**
 
-A11Y Agent is a **dual-persona accessibility pipeline** that combines automated detection, AI-powered fixes, and voice accessibility to serve both visual and visually impaired developers.
-
-## Two Personas, One Tool
-
-### 👩‍💻 Priya (Engineer)
-**Need:** Real-time feedback while writing HTML to meet accessibility standards  
-**Solution:** File watcher → instant linting → AI fix suggestions → pre-commit gates → CI/CD enforcement
-
-### 🎤 James (Visually Impaired Developer)
-**Need:** Accessible testing tools with voice I/O to verify product interfaces  
-**Solution:** Voice commands → spoken violations → cherry-picked fixes → verified re-scan
+> *"We built an accessibility testing tool — and then made it accessible."*
 
 ---
 
-## Pipeline Flow
+## The Problem
+
+Accessibility is checked **too late** — after code ships, after the PR merges, after the damage is done. And the irony: most accessibility checkers aren't accessible themselves. A visually impaired developer can't open browser DevTools, run axe, and read the results.
+
+## The Solution: Two Personas, One Tool
+
+**A11Y Agent** catches WCAG violations at every stage of development — **while you write code**, not after — and makes the tool itself fully accessible via voice.
+
+### 👩‍💻 Priya — sighted engineer writing HTML
+
+She wants real-time feedback: *"Tell me what's wrong the moment I save the file, and show me how to fix it."*
+
+```
+  Save file ──→ Watcher auto-lints (100ms) ──→ See violations + AI fix suggestions
+       │
+       ▼
+  git commit ──→ Pre-commit hook blocks bad code
+       │
+       ▼
+  Push PR ────→ GitHub Action scans with axe-core ──→ Merge only if clean
+```
+
+**Priya never ships an inaccessible page.** Every stage is a gate.
+
+### 🎤 James — visually impaired developer testing a product interface
+
+He can't read a terminal. He needs to **hear** violations and **speak** commands: *"Scan the bad page. Fix all critical issues."*
+
+```
+  "scan bad page" ──→ Vosk STT (offline) ──→ axe-core scan
+       │
+       ▼
+  Edge TTS reads violations aloud:
+  "[1] critical — images must have alt text. [2] serious — missing lang attribute."
+       │
+       ▼
+  "fix issue one and three" ──→ AI generates JSON fixes ──→ validated against source
+       │
+       ▼
+  Auto-apply + .bak backup ──→ Re-scan to verify ──→ "1 of 1 resolved, 7 remain"
+       │
+       ▼
+  Loop continues until clean or "done"
+```
+
+**James needs zero sighted assistance.** The entire flow is hands-free.
+
+---
+
+## Architecture
 
 ```mermaid
-flowchart TB
-    subgraph priya["👩‍💻 PRIYA - Visual Workflow"]
-        P1[Write HTML] --> P2[Save file]
-        P2 --> P3["watch.js auto-lints"]
-        P3 --> P4{Clean?}
-        P4 -->|"❌ Violations"| P5["Terminal: Colorized + AI fixes"]
-        P5 --> P1
-        P4 -->|"✅ Pass"| P6[git commit]
-        P6 --> P7["pre-commit hook"]
-        P7 -->|"❌ Fail"| P1
-        P7 -->|"✅ Pass"| P8[Push PR]
-        P8 --> P9["GitHub Action"]
-        P9 -->|"❌ Fail"| P1
-        P9 -->|"✅ Pass"| P10[Merge ✓]
+flowchart LR
+    subgraph detect ["Detection (deterministic)"]
+        lint["lint.js — static HTML checks\n~100ms, no browser"]
+        scan["scan.js — axe-core in Chromium\ncontrast, ARIA, focus order"]
     end
 
-    subgraph james["🎤 JAMES - Voice Workflow (agent.js)"]
-        J1["'scan bad page'"] --> J2["Vosk STT"]
-        J2 --> J3["axe-core scan"]
-        J3 --> J4["edge-tts reads<br/>numbered list aloud"]
-        J4 --> J5{"'fix issue one<br/>and three'"}
-        J5 --> J6["Per-violation JSON fixes<br/>validated against source"]
-        J6 --> J7["Apply + .bak backup"]
-        J7 --> J8["Verification re-scan"]
-        J8 --> J9["'1 of 1 resolved,<br/>7 violations remain'"]
-        J9 --> J4
+    subgraph ai ["AI (suggestions only)"]
+        llm["Ollama / OpenAI / Groq\nmodel-agnostic, local by default"]
     end
 
-    style priya fill:#fff4e1
-    style james fill:#e1f5ff
+    subgraph voice ["Voice I/O (accessibility)"]
+        stt["Vosk STT\noffline, privacy-first"]
+        tts["Edge TTS\nneural voice, espeak fallback"]
+    end
+
+    subgraph gates ["Shift-Left Gates"]
+        watch["watch.js — lint on save"]
+        hook["pre-commit hook"]
+        ci["GitHub Actions CI"]
+        vscode["VS Code extension\nlive squiggly diagnostics"]
+    end
+
+    detect --> ai
+    detect --> voice
+    detect --> gates
 ```
+
+**Key design principle:** Detection is deterministic (axe-core + static rules). AI only explains and suggests fixes — it never detects. Applied fixes are validated against the real source and verified by a re-scan.
 
 ## Features
 
