@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Employee Portal</title></head>
+<body>
+  <header>
+    <h1>Employee Portal</h1>
+    <img src="company-logo.png" alt="Acme Corp logo">
+  </header>
+
+  <nav aria-label="Main navigation">
+    <a href="/home"><img src="home-icon.svg" alt="Home"></a>
+    <a href="/profile">Profile</a>
+    <a href="/settings">Settings</a>
+  </nav>
+
+  <main>
+  <h2>Quick Actions</h2>
+
+  <button onclick="submitTimesheet()">Submit Timesheet</button>
+
+  <h2>Login</h2>
+  <form>
+    <label for="empid">Employee ID</label>
+    <input type="text" id="empid" placeholder="Employee ID">
+
+    <label for="pwd">Password</label>
+    <input type="password" id="pwd" placeholder="Password">
+
+    <label for="role">Role</label>
+    <select id="role">
+      <option value="">Select Role</option>
+      <option value="dev">Developer</option>
+      <option value="mgr">Manager</option>
+    </select>
+
+    <button type="submit">Login</button>
+  </form>
+
+  <h2>Timesheet</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Hours</th>
+        <th scope="col">Project</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>2026-09-01</td><td>8</td><td>A11Y Agent</td></tr>
+      <tr><td>2026-09-02</td><td>7.5</td><td>Infra</td></tr>
+    </tbody>
+  </table>
+
+  <video src="welcome.mp4" controls>
+    <track kind="captions" src="welcome-captions.vtt" srclang="en" label="English">
+  </video>
+  </main>
+</body>
+</html>
