@@ -124,6 +124,18 @@ npm run agent:text
 
 ### For Priya (Visual Workflow)
 
+**In the editor** — violations as squiggles while you type, no terminal:
+
+> Open this repo in VS Code and press **F5**, then pick *Run A11Y Agent
+> extension*. It builds on the way up and opens a second window with
+> `samples/bad-page.html` already squiggled.
+
+See [vscode-extension/README.md](vscode-extension/README.md) for the CLI
+equivalent and settings. It runs the static rules only — contrast and focus
+order need a rendered page, so those stay with `scan.js`.
+
+**In a terminal:**
+
 ```bash
 # Install dependencies
 npm install

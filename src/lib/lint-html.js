@@ -12,6 +12,51 @@ function snippet(el) {
   return el.toString().replace(/\s+/g, ' ').slice(0, 160);
 }
 
+// Offsets -> line/column. Built once per lint so each lookup is a binary
+// search rather than a rescan of the document.
+function lineStarts(html) {
+  const starts = [0];
+  for (let i = 0; i < html.length; i += 1) {
+    if (html[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
+
+function positionAt(starts, offset) {
+  let lo = 0;
+  let hi = starts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (starts[mid] <= offset) lo = mid;
+    else hi = mid - 1;
+  }
+  return { line: lo, column: offset - starts[lo] };
+}
+
+/**
+ * Source span of an element, or null when the parser gives us no offsets
+ * (synthetic nodes, or the document root of a fragment).
+ *
+ * Line and column are **0-based**, matching vscode.Position, because the
+ * editor extension is the consumer that needs them. Terminal output adds 1.
+ */
+function rangeOf(el, starts, docLength) {
+  const span = el?.range;
+  if (!Array.isArray(span) || span.length !== 2) return null;
+
+  const [rawStart, rawEnd] = span;
+  if (!Number.isInteger(rawStart) || !Number.isInteger(rawEnd)) return null;
+
+  // Clamp: never hand the editor a span outside the buffer.
+  const start = Math.max(0, Math.min(rawStart, docLength));
+  const end = Math.max(start, Math.min(rawEnd, docLength));
+
+  return {
+    start: { ...positionAt(starts, start), offset: start },
+    end: { ...positionAt(starts, end), offset: end },
+  };
+}
+
 function accessibleName(el) {
   const aria = attr(el, 'aria-label');
   if (aria && aria.trim()) return aria.trim();
@@ -55,6 +100,7 @@ function isInteractive(el) {
 export function lintHtml(html, filePath = 'document') {
   const root = parse(html, { comment: false });
   const violations = [];
+  const starts = lineStarts(html);
 
   const add = (id, impact, help, helpUrl, el, extra = {}) => {
     violations.push({
@@ -67,6 +113,7 @@ export function lintHtml(html, filePath = 'document') {
         target: extra.target || [filePath, el.tagName?.toLowerCase() || 'element'],
         html: snippet(el),
         failureSummary: extra.failureSummary || help,
+        range: rangeOf(el, starts, html.length),
       }],
     });
   };

@@ -1,0 +1,82 @@
+{
+  "name": "a11y-agent-vscode",
+  "displayName": "A11Y Agent",
+  "description": "Live WCAG accessibility diagnostics for HTML, as you write it",
+  "version": "0.1.0",
+  "publisher": "shift-left-a11y",
+  "private": true,
+  "license": "SEE LICENSE IN ../README.md",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:html"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "a11yAgent.scanDocument",
+        "title": "A11Y Agent: Scan This Document",
+        "enablement": "editorLangId == html"
+      }
+    ],
+    "configuration": {
+      "title": "A11Y Agent",
+      "properties": {
+        "a11yAgent.run": {
+          "type": "string",
+          "enum": [
+            "onType",
+            "onSave",
+            "manual"
+          ],
+          "default": "onType",
+          "enumDescriptions": [
+            "Lint as you type (debounced)",
+            "Lint when the file is saved",
+            "Only when the scan command is run"
+          ],
+          "description": "When to check the document."
+        },
+        "a11yAgent.debounceMs": {
+          "type": "number",
+          "default": 300,
+          "minimum": 0,
+          "description": "Idle time before linting when run is set to onType."
+        },
+        "a11yAgent.minimumImpact": {
+          "type": "string",
+          "enum": [
+            "minor",
+            "moderate",
+            "serious",
+            "critical"
+          ],
+          "default": "minor",
+          "description": "Hide violations below this impact level."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18",
+    "watch": "npm run build -- --sourcemap --watch",
+    "package": "npm run build -- --minify",
+    "test": "npm run build && node --test test/*.test.js",
+    "test:integration": "npm run build && node test/integration/run.js",
+    "test:all": "npm test && npm run test:integration"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^3.1.0",
+    "esbuild": "^0.25.0",
+    "mocha": "^12.0.0"
+  },
+  "dependencies": {
+    "node-html-parser": "^7.0.1"
+  }
+}

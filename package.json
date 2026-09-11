@@ -16,6 +16,7 @@
     "demo:watch": "node src/watch.js --dir samples/",
     "conversation": "node src/scan.js --file samples/bad-page.html --fix --interactive",
     "test": "node --test tests/*.test.js && node src/lint.js --file samples/good-page.html --fail-on minor",
+    "test:extension": "npm --prefix vscode-extension test",
     "agent": "node src/agent.js",
     "agent:text": "node src/agent.js --text",
     "eval": "node evaluation/run-eval.js",

@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // A plain shell task rather than "type": "npm". The npm task provider
+      // only discovers scripts it has scanned for, and from the repo root it
+      // resolves the root package.json, not the extension's.
+      "label": "build extension",
+      "type": "shell",
+      "command": "npm install --no-audit --no-fund && npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/vscode-extension"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    }
+  ]
+}

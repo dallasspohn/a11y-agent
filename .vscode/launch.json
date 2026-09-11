@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Works from the repo root, which is the folder you actually have open.
+      // There is a second copy in vscode-extension/.vscode/ for when that
+      // folder is the workspace root on its own.
+      "name": "Run A11Y Agent extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/vscode-extension",
+        "${workspaceFolder}/samples/bad-page.html"
+      ],
+      "outFiles": ["${workspaceFolder}/vscode-extension/dist/**/*.js"],
+      "preLaunchTask": "build extension"
+    }
+  ]
+}
