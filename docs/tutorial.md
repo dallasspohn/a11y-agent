@@ -325,7 +325,15 @@ Terminal workflows are great, but most developers live in their editor. The A11Y
 
 ### Install the extension
 
-**Option A — from `.vsix` (recommended):**
+**Option A — download from GitHub Releases (no clone needed):**
+
+Download the `.vsix` from [Releases](https://github.com/dallasspohn/a11y-agent/releases), then:
+
+```bash
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+```
+
+**Option B — build from source:**
 
 ```bash
 cd vscode-extension
@@ -333,7 +341,7 @@ npm install && npm run vsix        # builds a11y-agent-vscode-0.1.0.vsix
 code --install-extension a11y-agent-vscode-0.1.0.vsix
 ```
 
-**Option B — Extension Development Host (F5):**
+**Option C — Extension Development Host (F5):**
 
 1. Open the repo root in VS Code
 2. Press **F5** → select **Run A11Y Agent extension**
@@ -447,19 +455,25 @@ The [A11Y Agent Chrome Extension](https://github.com/dallasspohn/a11y-agent-chro
 
 ### Install
 
-```bash
-git clone https://github.com/dallasspohn/a11y-agent-chrome-plugin.git
-cd a11y-agent-chrome-plugin
-npm install
-npm run build          # bundles into dist/
-```
+**Option A — download from GitHub Releases (no clone needed):**
 
-Then in Chrome:
+Download `a11y-autofix-chrome-0.1.0.zip` from [Releases](https://github.com/dallasspohn/a11y-agent-chrome-plugin/releases), unzip it, then:
 
 1. Go to `chrome://extensions`
 2. Enable **Developer mode** (top right toggle)
-3. Click **Load unpacked** → select the `dist/` directory
+3. Click **Load unpacked** → select the unzipped `dist/` directory
 4. Done — the extension is active on every page
+
+**Option B — build from source:**
+
+```bash
+git clone https://github.com/dallasspohn/a11y-agent-chrome-plugin.git
+cd a11y-agent-chrome-plugin
+npm install --legacy-peer-deps
+npm run build          # bundles into dist/
+```
+
+Then in Chrome: `chrome://extensions` → Developer mode → Load unpacked → select `dist/`.
 
 ### What it does
 
