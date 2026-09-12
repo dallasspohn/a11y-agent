@@ -4,7 +4,20 @@ Accessibility violations as squiggles, while you type. This is the "from the
 start" half of Challenge 4: the feedback arrives before the file is saved,
 never mind before review.
 
-## Try it
+## Install
+
+### From `.vsix` (recommended)
+
+```bash
+cd vscode-extension
+npm install
+npm run vsix                # → a11y-agent-vscode-0.1.0.vsix
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+```
+
+Restart VS Code, open any HTML file, and squiggles appear.
+
+### From source (F5)
 
 Open the **repo root** in VS Code and press **F5** — pick *Run A11Y Agent
 extension*. The build runs automatically; a second window opens with
