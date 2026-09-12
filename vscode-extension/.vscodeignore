@@ -1,0 +1,7 @@
+.vscode/
+src/
+test/
+build.js
+.gitignore
+**/*.map
+*.vsix
