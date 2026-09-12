@@ -157,21 +157,31 @@ See [docs/voice.md](docs/voice.md) for setup and troubleshooting.
 
 ---
 
-## Benchmark Results
+## Benchmark
 
-Evaluated against 24 test pages including the [W3C WAI Before/After Demo](https://www.w3.org/WAI/demos/bad/):
+We test our scanners against **24 HTML pages** across two datasets:
+
+- **Handcrafted pages** (16 pages) — 8 intentionally broken pages with known violations (missing alt, bad contrast, heading chaos, keyboard traps, etc.) and 8 fixed counterparts with zero violations.
+- **W3C WAI Before/After Demo** (8 pages) — an external gold-standard dataset maintained by the W3C. Four inaccessible pages and their accessible versions. We didn't write these — they're the industry benchmark.
+
+For each page, we run both the static linter and the axe-core browser scanner, then check:
+
+- **True Positive Rate (TPR)** — did we catch every known violation rule?
+- **False Positive Rate (FPR)** — did we flag clean pages as broken?
 
 | Metric | Score |
 |---|---|
 | True Positive Rate (rule recall) | **100%** |
 | False Positive Rate (clean pages) | **0%** |
 
+Every violation in every bad page is caught. No clean page is falsely flagged. CI enforces TPR ≥ 95% and FPR ≤ 5% on every PR.
+
 ```bash
-npm run eval         # full benchmark report
-npm run eval:check   # CI threshold gate (TPR ≥ 95%, FPR ≤ 5%)
+npm run eval         # full benchmark report with per-rule accuracy
+npm run eval:check   # CI threshold gate
 ```
 
-See [evaluation/README.md](evaluation/README.md) for details.
+See [evaluation/README.md](evaluation/README.md) for the full dataset and methodology.
 
 ---
 
