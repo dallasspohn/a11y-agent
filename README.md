@@ -100,19 +100,28 @@ npm run agent:text     # same loop, keyboard input (no mic needed)
 ### VS Code extension
 
 ```bash
-# Option A: install from .vsix
+# Option A: download .vsix from GitHub Releases (no clone needed)
+# https://github.com/dallasspohn/a11y-agent/releases
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+
+# Option B: build from source
 cd vscode-extension && npm install && npm run vsix
 code --install-extension a11y-agent-vscode-0.1.0.vsix
 
-# Option B: press F5 in VS Code with the repo open
+# Option C: press F5 in VS Code with the repo open (dev mode)
 ```
 
 ### Chrome extension
 
 ```bash
+# Option A: download dist zip from GitHub Releases (no clone needed)
+# https://github.com/dallasspohn/a11y-agent-chrome-plugin/releases
+# Unzip → chrome://extensions → Developer mode → Load unpacked → select dist/
+
+# Option B: build from source
 git clone https://github.com/dallasspohn/a11y-agent-chrome-plugin.git
-cd a11y-agent-chrome-plugin && npm install && npm run build
-# Chrome → chrome://extensions → Developer mode → Load unpacked → select dist/
+cd a11y-agent-chrome-plugin && npm install --legacy-peer-deps && npm run build
+# chrome://extensions → Developer mode → Load unpacked → select dist/
 ```
 
 ---

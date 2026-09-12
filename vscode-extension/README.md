@@ -4,7 +4,28 @@ Accessibility violations as squiggles, while you type. This is the "from the
 start" half of Challenge 4: the feedback arrives before the file is saved,
 never mind before review.
 
-## Try it
+## Install
+
+### From GitHub Releases (no clone needed)
+
+Download the `.vsix` from [Releases](https://github.com/dallasspohn/a11y-agent/releases), then:
+
+```bash
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+```
+
+Restart VS Code, open any `.html` file — squiggles appear automatically.
+
+### Build from source
+
+```bash
+cd vscode-extension
+npm install
+npm run vsix               # → a11y-agent-vscode-0.1.0.vsix
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+```
+
+### Development mode (F5)
 
 Open the **repo root** in VS Code and press **F5** — pick *Run A11Y Agent
 extension*. The build runs automatically; a second window opens with
@@ -13,17 +34,11 @@ extension*. The build runs automatically; a second window opens with
 There is a second launch config in `vscode-extension/.vscode/` for when you
 have this folder open on its own.
 
-No editor, or F5 not cooperating:
+### Verify
 
 ```bash
-cd vscode-extension && npm install && npm run build
-code --extensionDevelopmentPath="$PWD" --new-window ../samples/bad-page.html
-```
-
-To confirm it works without looking at anything:
-
-```bash
-npm run test:integration    # activates the extension in a real VS Code
+npm test                 # 14 unit tests (~1s)
+npm run test:integration # real VS Code host (~30s, needs a display)
 ```
 
 ## What it reports
