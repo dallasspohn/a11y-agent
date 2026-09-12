@@ -295,7 +295,7 @@ Every push and pull request runs the full pipeline:
 # Already configured in .github/workflows/a11y.yml
 - Static lint — zero violations allowed
 - Browser scan — axe-core on sample pages
-- Unit tests — 18 tests covering linter, scanner, AI
+- Unit tests — covering linter, scanner, AI, and extension
 - Benchmark gate — TPR ≥ 95%, FPR ≤ 5%
 ```
 
@@ -318,8 +318,63 @@ By the time code reaches `main`, it's been checked **three times**. Accessibilit
 
 ---
 
-## Chapter 6: James's Voice Workflow — Hands-Free, Zero Sighted Assistance
+## Chapter 6: VS Code Extension — Squiggles While You Type
 {: .text-purple-300 }
+
+Terminal workflows are great, but most developers live in their editor. The A11Y Agent VS Code extension brings accessibility diagnostics **directly into VS Code** — violations appear as squiggly underlines the moment you type, just like ESLint or TypeScript errors.
+
+### Install the extension
+
+**Option A — from `.vsix` (recommended):**
+
+```bash
+cd vscode-extension
+npm install && npm run vsix        # builds a11y-agent-vscode-0.1.0.vsix
+code --install-extension a11y-agent-vscode-0.1.0.vsix
+```
+
+**Option B — Extension Development Host (F5):**
+
+1. Open the repo root in VS Code
+2. Press **F5** → select **Run A11Y Agent extension**
+3. A new window opens with the extension loaded
+
+### What you'll see
+
+Open `samples/bad-page.html` in the extension-enabled window:
+
+- **Yellow squiggles** on `<img src="logo.png">` — missing alt text
+- **Yellow squiggles** on `<select>` — missing label
+- **Blue info marks** on `<h5>` — heading level skip
+- **Hover** any squiggle → see the WCAG explanation and why it matters
+- **Click the rule ID** → opens the W3C success criterion page
+
+Check the **Problems panel** (Ctrl+Shift+M / Cmd+Shift+M) for the full list.
+
+### Settings
+
+| Setting | Default | What it does |
+|---|---|---|
+| `a11yAgent.run` | `onType` | When to lint: `onType` (300ms debounce), `onSave`, or `manual` |
+| `a11yAgent.debounceMs` | `300` | Idle time before linting (onType mode) |
+| `a11yAgent.minimumImpact` | `minor` | Hide violations below this impact level |
+
+Command palette: **A11Y Agent: Scan This Document** — manual trigger with a result count notification.
+
+### What it catches vs what it doesn't
+
+The extension runs the **static linter** (`lint-html.js`) — the same 12 rules behind `npm run demo:lint`. It catches structural issues (missing alt, missing lang, heading order, form labels, keyboard traps).
+
+It does **not** catch rendering-dependent issues like color contrast or computed focus order — those need a real browser. Run `node src/scan.js` for the full axe-core pass. The extension is the fast inner loop, not a replacement.
+
+{: .highlight }
+> **Scale story:** Install this extension org-wide and every HTML file gets real-time accessibility feedback. No training, no extra steps — just squiggles as you type.
+
+---
+
+## Chapter 7: James's Voice Workflow — Hands-Free, Zero Sighted Assistance
+{: .text-purple-300 }
+
 
 Everything above was Priya's workflow — visual, terminal-based. Now meet James.
 
@@ -383,7 +438,92 @@ Here's what a session sounds like. The agent speaks every response aloud using a
 
 ---
 
-## Chapter 7: What's Under the Hood
+## Chapter 8: Chrome Extension — Auto-Fix Any Page You Browse
+{: .text-purple-300 }
+
+The CLI scans files. The VS Code extension catches issues while you code. But what about **testing existing websites** — yours or anyone else's?
+
+The [A11Y Agent Chrome Extension](https://github.com/dallasspohn/a11y-agent-chrome-plugin) auto-repairs WCAG violations in the live DOM **as pages load**. No scanning, no commands — it fixes issues before you even see them.
+
+### Install
+
+```bash
+git clone https://github.com/dallasspohn/a11y-agent-chrome-plugin.git
+cd a11y-agent-chrome-plugin
+npm install
+npm run build          # bundles into dist/
+```
+
+Then in Chrome:
+
+1. Go to `chrome://extensions`
+2. Enable **Developer mode** (top right toggle)
+3. Click **Load unpacked** → select the `dist/` directory
+4. Done — the extension is active on every page
+
+### What it does
+
+Open any page — say, `samples/bad-page.html` or a real website. The extension:
+
+1. **Streams fixes at parse time** — a MutationObserver patches DOM nodes before their first paint
+2. **Runs axe-core** at DOMContentLoaded to catch anything the streaming pass missed
+3. **Patches remaining violations** by rule ID
+4. **Validates** with a second axe run and reports anything still failing
+
+All fixes are **deterministic** — no AI, no network calls, no API keys. Just DOM patches.
+
+### The badge
+
+Look at the extension icon in your toolbar:
+
+| Badge | Meaning |
+|---|---|
+| **Green** number | All detected violations were fixed |
+| **Orange** number | Some violations remain unfixed |
+| **Gray** | Extension disabled on this site |
+
+### The popup
+
+Click the extension icon to see:
+
+- **Found / Fixed / Unfixed** counts
+- A collapsible **per-rule list** showing before/after for each fix
+- **Revert all** — undo every fix (originals preserved in `data-a11y-orig-*`)
+- **Re-run** — recheck the page
+- **Copy JSON** — export the report (CI integration)
+- **Disable on this site** — add to blocklist
+
+### What it fixes
+
+| Rule | Fix |
+|---|---|
+| `html-has-lang` | Sets `lang` from meta tags or navigator |
+| `image-alt` | Derives alt from title, figcaption, filename |
+| `color-contrast` | Steps foreground color until 4.5:1 ratio |
+| `label` | Adds `aria-label` from placeholder or field name |
+| `link-name` | Adds `aria-label` from title, child img, or href |
+| `heading-order` | Sets `role="heading"` + corrected `aria-level` |
+| `click-events` | Adds `role="button"` + keyboard handler |
+| `video-autoplay` | Adds `controls` and `muted` |
+| `table headers` | Adds `scope` and `role` to header cells |
+
+Every fix is tagged with `data-a11y-fixed` — inspect any element to see what was changed.
+
+### Optional: AI-powered alt text
+
+By default, image alt text is derived deterministically (filename, figcaption, etc.). For better descriptions, enable AI alt text in the extension Options:
+
+1. Click extension icon → **Options**
+2. Toggle **AI alt text** on
+3. Enter an Anthropic API key
+4. Only `{src, surrounding-text, page-title}` is sent — **never the image bytes**
+
+{: .highlight }
+> **Scale story:** Roll this out to QA teams, product managers, or content writers. Every page they visit gets auto-repaired. They see the badge count, click for details, and file bugs with the JSON export. No technical setup needed beyond "Load unpacked."
+
+---
+
+## Chapter 9: What's Under the Hood
 {: .text-purple-300 }
 
 | Layer | Technology | Why |
@@ -421,7 +561,9 @@ Here's what a session sounds like. The agent speaks every response aloud using a
 | `npm run install-hooks` | Install pre-commit hook |
 | `npm run eval` | Run the benchmark suite |
 | `npm test` | Run all unit tests |
+| `cd vscode-extension && npm run vsix` | Build `.vsix` for VS Code |
+| `code --install-extension *.vsix` | Install the VS Code extension |
 
 ---
 
-[← Back to Home]({% link index.md %}){: .btn }
+[← Back to Home]({{ site.baseurl }}{% link index.md %}){: .btn }

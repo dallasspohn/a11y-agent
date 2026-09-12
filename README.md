@@ -45,6 +45,8 @@ He can't read a terminal. He needs to **hear** violations and **speak** commands
 - 👁️ **Real-time Feedback** — File watcher auto-lints on save with instant visual feedback
 - 🚫 **Git Integration** — Pre-commit hooks and CI/CD gates prevent regressions
 - 🦙 **Local Models** — Ollama by default (Llama 3.1, Qwen, etc.) — no API key, no token cost
+- 🧩 **VS Code Extension** — Squiggly underlines on violations as you type
+- 🌐 **Chrome Extension** — Auto-fix WCAG violations on any page you browse
 
 ## Quick Start
 
@@ -223,7 +225,7 @@ See [evaluation/README.md](evaluation/README.md) for details.
 npm run demo          # scan and print
 npm run demo:lint     # static lint only, no browser
 npm run demo:agent    # reset fixture + full voice loop
-npm test              # 26 unit tests + a clean-page regression check
+npm test              # unit tests + a clean-page regression check
 ```
 
 > ⚠️ **`npm run demo:reset` before every rehearsal.** Auto-apply edits the real
@@ -250,7 +252,8 @@ npm test              # 26 unit tests + a clean-page regression check
 ✅ File watcher, pre-commit hook, GitHub Actions CI  
 ✅ Benchmark evaluation (24 pages, 100% TPR, 0% FPR)  
 ✅ Architecture diagrams  
-🔄 VS Code extension — live diagnostics on save ([PR #9](https://github.com/dallasspohn/a11y-agent/pull/9))
+✅ VS Code extension — live diagnostics as you type ([vscode-extension/](vscode-extension/))  
+✅ Chrome extension — auto-fix violations on any page ([a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin))
 
 ### Roadmap
 - Batch scanning (multiple URLs / sitemaps)
@@ -274,7 +277,10 @@ item is the W3C WAI Before/After Demonstration under `evaluation/pages/w3c-bad/`
 ## References
 
 - [docs/voice.md](docs/voice.md) — Voice setup, mic config, troubleshooting
+- [vscode-extension/](vscode-extension/) — VS Code extension (squiggles while you type)
+- [a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin) — Chrome extension (auto-fix any page)
 - [evaluation/README.md](evaluation/README.md) — Benchmark dataset and results
+- [Demo site](https://dallasspohn.github.io/a11y-agent/) — Hands-on tutorial and documentation
 - [anthony-integration/](anthony-integration/) — GNOME voice desktop (design sketch, not wired up)
 
 ## Team

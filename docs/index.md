@@ -10,7 +10,7 @@ nav_order: 1
 We built an accessibility testing tool — and then made it accessible.
 {: .fs-6 .fw-300 }
 
-[Follow the Demo →]({% link tutorial.md %}){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Follow the Demo →]({{ site.baseurl }}{% link tutorial.md %}){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [GitHub Repo](https://github.com/dallasspohn/a11y-agent){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
@@ -54,18 +54,20 @@ James is testing Priya's product page for accessibility. He can't read a termina
 
 ## What You'll See in the Demo
 
-The [tutorial]({% link tutorial.md %}) walks you through a complete hands-on session:
+The [tutorial]({{ site.baseurl }}{% link tutorial.md %}) walks you through a complete hands-on session:
 
 1. **Setup** — clone, install, start a local AI model
 2. **Scan a local file** — find 11 violations in a sample page
 3. **Scan a real Red Hat product page** — find real issues on redhat.com
 4. **Get AI fix suggestions** — using a free, local open-source model
 5. **Automate** — file watcher, pre-commit hooks, CI/CD gates
-6. **Voice workflow** — hear violations and fix them by speaking
+6. **VS Code extension** — squiggly underlines on violations while you type
+7. **Voice workflow** — hear violations and fix them by speaking
+8. **Chrome extension** — auto-fix violations on any page you browse
 
 Everything runs locally. No API keys, no cloud costs, no data leaving your machine.
 
-[Start the Tutorial →]({% link tutorial.md %}){: .btn .btn-primary }
+[Start the Tutorial →]({{ site.baseurl }}{% link tutorial.md %}){: .btn .btn-primary }
 
 ---
 
