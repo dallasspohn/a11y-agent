@@ -195,12 +195,10 @@ See [evaluation/README.md](evaluation/README.md) for the full dataset and method
 ✅ Voice triage loop with cherry-picked auto-fix  
 ✅ Edge TTS neural voice + Vosk offline STT  
 ✅ File watcher, pre-commit hook, GitHub Actions CI  
-✅ VS Code extension — squiggles while you type  
-✅ Chrome extension — auto-fix any page you browse  
-✅ Benchmark evaluation (24 pages, 100% TPR, 0% FPR)  
-✅ Architecture diagrams  
 ✅ VS Code extension — live diagnostics as you type ([vscode-extension/](vscode-extension/))  
-✅ Chrome extension — auto-fix violations on any page ([a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin))
+✅ Chrome extension — auto-fix violations on any page ([a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin))  
+✅ Benchmark evaluation (24 pages, 100% TPR, 0% FPR)  
+✅ Architecture diagrams
 
 ### Known Issues
 
