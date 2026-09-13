@@ -6,6 +6,7 @@ never mind before review.
 
 ## Install
 
+
 ### From GitHub Releases (no clone needed)
 
 Download the `.vsix` from [Releases](https://github.com/dallasspohn/a11y-agent/releases), then:
@@ -18,6 +19,7 @@ Restart VS Code, open any `.html` file — squiggles appear automatically.
 
 ### Build from source
 
+
 ```bash
 cd vscode-extension
 npm install
@@ -26,6 +28,7 @@ code --install-extension a11y-agent-vscode-0.1.0.vsix
 ```
 
 ### Development mode (F5)
+
 
 Open the **repo root** in VS Code and press **F5** — pick *Run A11Y Agent
 extension*. The build runs automatically; a second window opens with

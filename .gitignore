@@ -32,6 +32,7 @@ Thumbs.db
 # Build output
 dist/
 build/
+*.vsix
 
 # VS Code downloaded by the extension integration tests (~1GB)
 .vscode-test/

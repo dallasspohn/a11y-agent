@@ -34,6 +34,7 @@ Accessibility is checked **too late** — after code ships, after the damage is 
 
 ## Features
 
+
 ### Detection
 
 - **Static HTML linter** — 12 rules, ~100ms, no browser needed. Catches missing alt, missing lang, heading order, form labels, keyboard traps, table headers.
@@ -177,8 +178,10 @@ For each page, we run both the static linter and the axe-core browser scanner, t
 Every violation in every bad page is caught. No clean page is falsely flagged. CI enforces TPR ≥ 95% and FPR ≤ 5% on every PR.
 
 ```bash
+
 npm run eval         # full benchmark report with per-rule accuracy
 npm run eval:check   # CI threshold gate
+
 ```
 
 See [evaluation/README.md](evaluation/README.md) for the full dataset and methodology.
@@ -195,6 +198,9 @@ See [evaluation/README.md](evaluation/README.md) for the full dataset and method
 ✅ VS Code extension — squiggles while you type  
 ✅ Chrome extension — auto-fix any page you browse  
 ✅ Benchmark evaluation (24 pages, 100% TPR, 0% FPR)  
+✅ Architecture diagrams  
+✅ VS Code extension — live diagnostics as you type ([vscode-extension/](vscode-extension/))  
+✅ Chrome extension — auto-fix violations on any page ([a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin))
 
 ### Known Issues
 
@@ -206,6 +212,7 @@ See [evaluation/README.md](evaluation/README.md) for the full dataset and method
 
 ## References
 
+
 - [Demo site](https://dallasspohn.github.io/a11y-agent/) — Hands-on tutorial
 - [vscode-extension/](vscode-extension/) — VS Code extension
 - [a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin) — Chrome extension
@@ -216,6 +223,7 @@ See [evaluation/README.md](evaluation/README.md) for the full dataset and method
 
 [Apache License 2.0](LICENSE) — Copyright 2026 Red Hat, Inc.  
 Third-party content listed in [NOTICE](NOTICE).
+
 
 ## Team
 
