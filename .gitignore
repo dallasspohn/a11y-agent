@@ -26,6 +26,8 @@ Thumbs.db
 !vscode-extension/.vscode/launch.json
 !vscode-extension/.vscode/tasks.json
 .idea/
+# Cursor's local agent/skill config — machine-specific, not shared tooling.
+.cursor/*
 *.swp
 *.swo
 
