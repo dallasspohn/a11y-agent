@@ -10,13 +10,13 @@
 
 ## The Problem
 
-Accessibility is checked **too late** — after code ships, after the damage is done. And most accessibility tools aren't accessible themselves — a developer who is blind can't open DevTools and read the results.
+Accessibility is checked **too late** — after code ships, after the damage is done. And most accessibility tools aren't accessible themselves — a visually impaired developer can't open DevTools and read the results.
 
 ## The Solution
 
 **A11Y Agent** catches WCAG violations **while you code** and makes the tool itself fully usable via voice.
 
-| | Priya — sighted engineer | James — developer who is blind |
+| | Priya — sighted engineer | James — visually impaired developer |
 |---|---|---|
 | **Wants** | Real-time feedback as she writes HTML | Scan and fix a page without sighted help |
 | **Uses** | Terminal, editor, VS Code squiggles | Voice commands, spoken results |

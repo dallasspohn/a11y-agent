@@ -7,7 +7,7 @@ nav_order: 2
 # Hands-On Demo: From Zero to Accessible
 {: .fs-8 }
 
-Follow along step by step. By the end, you'll have scanned a real Red Hat product page, generated AI-powered fixes using a free open-source model, and seen how a developer who is blind can do the same thing entirely by voice.
+Follow along step by step. By the end, you'll have scanned a real Red Hat product page, generated AI-powered fixes using a free open-source model, and seen how a visually impaired developer can do the same thing entirely by voice.
 {: .fs-5 .fw-300 }
 
 ---
@@ -388,7 +388,7 @@ It does **not** catch rendering-dependent issues like color contrast or computed
 
 Everything above was Priya's workflow — visual, terminal-based. Now meet James.
 
-James is a developer who is blind. He's testing the same product page, but he can't read any of the terminal output we just saw. He needs to **hear** violations and **speak** commands.
+James is a visually impaired developer. He's testing the same product page, but he has trouble reading the terminal output we just saw. He needs to **hear** violations and **speak** commands.
 
 ### Start the agent
 

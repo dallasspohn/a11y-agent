@@ -21,7 +21,7 @@ We built an accessibility testing tool — and then made it accessible.
 
 Accessibility bugs are caught **after code ships** — in audits, in lawsuits, in angry user feedback. By then the fix is 10× more expensive and the damage is done.
 
-And here's the irony: most accessibility tools require you to **see** the screen. A developer who is blind can't open browser DevTools, run a scanner, and read the colored output.
+And here's the irony: most accessibility tools require you to **see** the screen. A visually impaired developer can't open browser DevTools, run a scanner, and read the colored output.
 
 **A11Y Agent** solves both problems:
 
@@ -36,9 +36,9 @@ And here's the irony: most accessibility tools require you to **see** the screen
 
 Priya is shipping a new product page. She wants her editor to flag accessibility issues **the moment she saves**, her commits blocked if violations exist, and her PR gated by CI. She works visually — terminal output, color-coded severity, copy-paste fixes.
 
-### 🎤 James — a developer who is blind
+### 🎤 James — a visually impaired developer
 
-James is testing Priya's product page for accessibility. He can't read a terminal. He needs to **hear** the violations, **speak** commands to fix them, and **verify** the fixes — all without sighted assistance.
+James is testing Priya's product page for accessibility. With some settings he has trouble reading terminal output. He needs to **hear** the violations, **speak** commands to fix them, and **verify** the fixes — all without sighted assistance.
 
 **One tool serves both.** The detection engine, AI fix generation, and validation pipeline are shared. Only the I/O layer differs.
 

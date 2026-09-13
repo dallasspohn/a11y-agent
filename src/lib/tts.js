@@ -156,7 +156,7 @@ async function speakWithEspeak(text, rate = '175') {
   if (!cleanText.trim()) return;
 
   // This is the last line of defence — if it throws, the tool goes silent for a
-  // blind user. argv form, and never rethrow.
+  // visually impaired user. argv form, and never rethrow.
   try {
     await execFileAsync('espeak-ng', ['-s', String(parseInt(rate) || 175), '--', cleanText]);
   } catch (error) {
