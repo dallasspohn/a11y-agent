@@ -200,6 +200,8 @@ node src/lint.js --file samples/bad-page.html --fix
 The AI processes each violation and suggests a targeted edit:
 
 ```
+Generating AI fix suggestions...
+
   image-alt
   ─────────
   WHY:   Screen readers cannot describe images without alt text.
