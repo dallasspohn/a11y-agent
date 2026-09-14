@@ -46,6 +46,8 @@ ollama pull qwen3:14b      # fast, high-quality open model (~9GB)
 > export A11Y_AI_MODEL=gpt-4o
 > export A11Y_AI_KEY=sk-...
 > ```
+>
+> Prefer Claude? It's supported directly via Vertex AI (see Chapter 4) — no credentials committed to the repo, just your own GCP project.
 
 ### Install Chromium for browser scanning
 
@@ -232,7 +234,7 @@ Generating AI fix suggestions...
 
 ### Choose your model
 
-The AI layer is **model-agnostic**. It talks to any OpenAI-compatible endpoint:
+The AI layer is **model-agnostic**. It talks to any OpenAI-compatible endpoint — plus Claude via Vertex AI as a first-class option:
 
 | Provider | Command | Cost |
 |---|---|---|
@@ -240,6 +242,10 @@ The AI layer is **model-agnostic**. It talks to any OpenAI-compatible endpoint:
 | **Ollama** (larger) | `ollama pull llama3.1:70b` | Free, local, better quality |
 | **OpenAI** | `export A11Y_AI_URL=https://api.openai.com/v1` | ~$0.01/scan |
 | **Groq** | `export A11Y_AI_URL=https://api.groq.com/openai/v1` | Free tier available |
+| **Claude (Vertex AI)** | `export A11Y_AI_PROVIDER=vertex` | Your GCP billing |
+
+{: .note }
+> Vertex serves Claude through Anthropic's own Messages API, not the OpenAI format Ollama/OpenAI/Groq use — that's why it's a separate provider flag (`A11Y_AI_PROVIDER=vertex`) instead of just another `A11Y_AI_URL`. Nothing project-specific lives in this repo: auth comes from your own `gcloud auth application-default login`, and your project from `ANTHROPIC_VERTEX_PROJECT_ID`. Full setup in the [README](https://github.com/dallasspohn/a11y-agent#claude-via-vertex-ai).
 
 {: .important }
 > **AI never decides what's broken.** Detection is deterministic — axe-core and static HTML rules. AI only explains violations and suggests fixes. This means you get consistent, reproducible results regardless of which model you use (or if you use one at all).
@@ -546,7 +552,7 @@ By default, image alt text is derived deterministically (filename, figcaption, e
 |---|---|---|
 | Static linting | Custom HTML parser | Fast (~100ms), no browser, catches structural issues |
 | Browser scanning | axe-core via Playwright | Industry standard, catches rendering-dependent issues |
-| AI fixes | OpenAI-compatible API (Ollama default) | Model-agnostic, local-first, no vendor lock-in |
+| AI fixes | OpenAI-compatible API (Ollama default) or Claude via Vertex AI | Model-agnostic, local-first, no vendor lock-in |
 | Voice output | Edge TTS (neural) → espeak-ng (fallback) | Natural voice with guaranteed offline fallback |
 | Voice input | Vosk (offline STT) | No audio leaves the machine |
 | File watching | chokidar | Re-lint on every save |

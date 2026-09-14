@@ -6,7 +6,7 @@
  * the model for one violation at a time and demands exact before/after strings,
  * so a fix can be selected individually and written to disk.
  */
-import { createClient, activeModel } from './ai-fixes.js';
+import { complete } from './ai-fixes.js';
 
 const MAX_SOURCE_CHARS = 60_000;
 const MAX_NODES_PER_VIOLATION = 4;
@@ -132,27 +132,22 @@ function validateEdits(edits, source) {
  * @returns {Promise<Array>} One entry per violation, in the same order
  */
 export async function generateFixPlan({ violations, source, onProgress }) {
-  const client = createClient();
-  const model = activeModel();
   const plan = [];
 
   for (const [index, violation] of violations.entries()) {
     onProgress?.(index + 1, violations.length, violation);
 
     try {
-      const response = await client.chat.completions.create({
-        model,
-        max_tokens: 2048,
+      const content = await complete({
+        system: SYSTEM_PROMPT,
+        user: buildUserPrompt(violation, source),
         // Low temperature: we need verbatim source copying, not creativity
         temperature: 0,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserPrompt(violation, source) },
-        ],
+        json: true,
+        maxTokens: 2048,
       });
 
-      const parsed = parseJsonResponse(response.choices[0]?.message?.content);
+      const parsed = parseJsonResponse(content);
 
       if (!parsed) {
         plan.push({ violation, why: null, wcag: null, edits: [], error: 'model did not return valid JSON' });

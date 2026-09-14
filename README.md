@@ -43,7 +43,7 @@ Accessibility is checked **too late** — after code ships, after the damage is 
 
 ### AI-Powered Fixes
 
-- **Model-agnostic** — works with any OpenAI-compatible API. Ollama (free, local) by default. Also works with OpenAI, Groq, or any compatible endpoint.
+- **Model-agnostic** — works with any OpenAI-compatible API. Ollama (free, local) by default. Also works with OpenAI, Groq, Claude via Vertex AI, or any compatible endpoint.
 - **Concrete edits** — not vague advice. Each fix shows a before/after code snippet you can copy-paste.
 - **Validated** — every edit's `before` string must exist verbatim in the source. No hallucinated patches.
 - **Verified** — a re-scan after applying proves the fix worked.
@@ -131,7 +131,8 @@ cd a11y-agent-chrome-plugin && npm install --legacy-peer-deps && npm run build
 
 ### AI provider
 
-Any OpenAI-compatible endpoint. Defaults to local Ollama — no API key needed.
+Defaults to local Ollama — no API key needed. Works with any OpenAI-compatible
+endpoint, plus Claude via Vertex AI as a first-class option.
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -146,6 +147,31 @@ A11Y_AI_MODEL=qwen3:14b node src/lint.js --file page.html --fix
 # Use OpenAI instead
 A11Y_AI_URL=https://api.openai.com/v1 A11Y_AI_KEY=sk-... node src/scan.js --file page.html --fix
 ```
+
+#### Claude via Vertex AI
+
+Vertex serves Claude through Anthropic's own Messages API, not the OpenAI
+format, so it needs its own provider flag rather than just a different
+`A11Y_AI_URL`. Nothing project-specific is committed here — auth and project
+come from your own environment:
+
+```bash
+npm install @anthropic-ai/vertex-sdk   # optional dep, not installed by default
+gcloud auth application-default login  # or set GOOGLE_APPLICATION_CREDENTIALS
+
+export A11Y_AI_PROVIDER=vertex
+export ANTHROPIC_VERTEX_PROJECT_ID=your-gcp-project-id
+export CLOUD_ML_REGION=us-east5              # your Vertex region
+export A11Y_AI_MODEL=claude-3-7-sonnet@20250219  # optional, this is the default
+
+node src/lint.js --file page.html --fix
+```
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `A11Y_AI_PROVIDER` | `openai` | Set to `vertex` to use Claude on Vertex AI |
+| `ANTHROPIC_VERTEX_PROJECT_ID` | — | Your GCP project (required for `vertex`) |
+| `CLOUD_ML_REGION` | `us-east5` | Vertex region hosting the model |
 
 ### Voice
 
