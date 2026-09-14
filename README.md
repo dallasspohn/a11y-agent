@@ -188,26 +188,6 @@ See [evaluation/README.md](evaluation/README.md) for the full dataset and method
 
 ---
 
-## Project Status
-
-✅ Static HTML linter + axe-core browser scanner  
-✅ Model-agnostic AI fix suggestions (Ollama default)  
-✅ Voice triage loop with cherry-picked auto-fix  
-✅ Edge TTS neural voice + Vosk offline STT  
-✅ File watcher, pre-commit hook, GitHub Actions CI  
-✅ VS Code extension — live diagnostics as you type ([vscode-extension/](vscode-extension/))  
-✅ Chrome extension — auto-fix violations on any page ([a11y-agent-chrome-plugin](https://github.com/dallasspohn/a11y-agent-chrome-plugin))  
-✅ Benchmark evaluation (24 pages, 100% TPR, 0% FPR)  
-✅ Architecture diagrams
-
-### Known Issues
-
-- **AI fix quality varies by model.** `image-alt` and `html-has-lang` are reliable. Structural rules may produce imperfect edits on small models — use `qwen3:14b` or larger. `.bak` backup is always created.
-- **Fix generation is slow locally** — ~30s per violation on `llama3.1`. Select one or two issues during a live demo.
-- **Auto-apply only works on local files**, not URLs.
-
----
-
 ## References
 
 
