@@ -67,6 +67,10 @@ The [tutorial]({{ site.baseurl }}{% link tutorial.md %}) walks you through a com
 
 Everything runs locally. No API keys, no cloud costs, no data leaving your machine.
 
+<div style="text-align: center; margin: 2rem 0;">
+  <iframe width="560" height="315" style="max-width:100%; height:auto; aspect-ratio:16/9;" src="https://www.youtube.com/embed/Bz8SjTPKGSU" title="A11Y Agent demo video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 [Start the Tutorial →]({{ site.baseurl }}{% link tutorial.md %}){: .btn .btn-primary }
 
 ---
